@@ -1,0 +1,105 @@
+---
+title: "Avaliação da Resistência de Genótipos de Cafeeiro à Ferrugem (*Hemileia vastatrix*)"
+author: "Amanda Pereira Honório & Richard Pardes-Espinosa"
+data: "2024-06-12"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: inline
+toc: true
+number-sections: true
+code-fold: show
+code-summary: "ver código"
+---
+
+## Introdução
+
+O fungo biotrófico *Hemileia vastatrix*, o temido causador da ferrugem do cafeeiro, apresenta um ciclo de vida autóico, completando todas as suas etapas em um único hospedeiro: o cafeeiro (*Coffea* spp.). Somente as fases de urédia (comumente observada em campo), télia e basidial foram observadas e as fases como pícno e écio, ainda não foram documentadas (Figura 1).
+
+![ciclo roya](D:\FIP_606\Ferrugen\Trabalho_Final\Captura1.PNG.jpg){width=200}
+
+Os sintomas da ferrugem do cafeeiro se manifestam na face inferior das folhas, inicialmente com pequenas manchas amarelo-pálidas de 1 a 3 mm. Com o tempo, essas manchas aumentam até 2 cm, adquirindo coloração amarelo-alaranjada e aspecto pulverulento. Na face superior, surgem lesões cloróticas amarelas correspondentes às pústulas inferiores. As lesões aumentam e o centro se torna necrótico (Figura 2.
+
+![hojas con lesiones](D:\FIP_606\Ferrugen\Trabalho_Final\Captura1.PNG.jpg){width=200}
+
+Em condições favoráveis ao fungo, as perdas na produção podem chegar a 35%. Por tanto, os cultivares resistentes resistentes à ferrugem é uma alternativa promissora e sustentável para o manejo da doença. No entanto, a identificação de materiais resistentes é um processo desafiador e contínuo, pois novas raças do fungo podem surgir, exigindo constante atualização das estratégias de controle. Essa estratégia, embora promissora, exige investimentos em pesquisa e desenvolvimento e pode levar tempo para ser implementada em larga escala.
+
+
+## Objetivo e hipóteses
+
+O objetivo deste estudo é identificar os genótipos de *C. arabica* resistentes à ferrugem do café (*H. vastatrix*) em condições de infecção natural, classificando 168 acessões de café com base em sua resistência.
+
+### Hipóteses testadas
+**Hipótese nula (H0):** Não há diferença significativa na resistência à ferrugem entre os genótipos avaliados. A média da resistência é igual para todos os genótipos.
+
+![Ho](D:\FIP_606\Ferrugen\Trabalho_Final\Captura1.PNG.jpg){width=200}
+
+**Hipótese alternativa (Ha):** Pelo menos um dos genótipos apresenta resistência significativamente maior à ferrugem em comparação com os demais.
+
+![Ha](D:\FIP_606\Ferrugen\Trabalho_Final\Captura1.PNG.jpg){width=200}
+
+## Local de experimentos
+O estudo foi realizado durante 2019-2020 na Coleção de Germoplasma Coffea arabica do INIA, EEA Pichanaki. O campo experimental está localizado a uma latitude de 10°55'29" Sul, longitude de 74°52'36" Leste, a uma altitude de 686 m s.n.m., no distrito de Pichanaki, província de Chanchamayo, região de Junín.
+
+```{r}
+# Cargar las librerías
+library(leaflet)
+library(plotly)
+
+# Coordenadas del campo experimental
+latitude <- -10.935177852548413
+longitude <- -74.93517671733474
+
+# Crear mapa con las coordenadas
+map <- leaflet() |> 
+  addTiles() |>   # Agregar capa de azulejos predeterminada
+  setView(lng = longitude, lat = latitude, zoom = 10) |> 
+  addMarkers(lng = longitude, lat = latitude, 
+             popup = "Campo Experimental EEA Pichanaki")
+map
+```
+
+
+## Metodologia de avaliação
+
+### Incidência
+
+A incidência da doença foi avaliada em cada ramo produtivo, contando-se e registrando-se o número total de folhas e o número de folhas com lesões de esporulação, independentemente do número de lesões presentes em cada folha. A variável foi expressa como a média da porcentagem de incidência de ferrugem por genótipo, determinada pela relação entre o número de folhas doentes (NHE) e o número de folhas presentes (NHPr) no ramo produtivo no momento de cada leitura.
+ 
+
+![mi incidencia](D:\FIP_606\Ferrugen\Trabalho_Final\Captura1.PNG.jpg){width=200}
+
+### Severidade
+
+Foi estimado de acordo com a escala proposta por Sera e colaboradores (2007), seguindo a fórmula proposta por (McKinney, 1923): 
+ 
+
+![mi severidad](D:\FIP_606\Ferrugen\Trabalho_Final\Captura1.PNG.jpg){width=200}
+
+### Desfolha
+
+Foi determinada com base na metodologia proposta por (Alvarado Alvarado e Solórzano Buitrago, 2001), que consistiu em obter a porcentagem de folhas caídas (PDP) para cada acesso, a partir do produto da diferença de potencial foliar (NHPot) e do número de folhas presentes (NHPr) nos ramos no momento de cada avaliação, para esta medida foram utilizados os ramos marcados avaliados para ferrugem amarela. O percentual de desfolha foi estimado da seguinte forma:
+
+
+![mi defoliation](D:\FIP_606\Ferrugen\Trabalho_Final\Captura1.PNG.jpg){width=200}
+
+## Bibliografia 
+
+Alvarado Alvarado, G., & Solórzano Buitrago, L. (2001). Caracterización de la resistencia incompleta a Hemileia vastatrix en genotipos de café en Colombia. Cenicafé, 52(1), 5-19.
+
+McKinney, H. (1923). Influence of soil temperature and moisture on infection of wheat seedlings by helmin. Journal of agricultural research, 26, 195.
+
+Sera, G.H., Sera, T., Ito, D.S., Azevedo, J.A. de, Mata, J.S. da, Dói, D.S., Ribeiro Filho, C., & Kanayama, F.S. (2007). Resistance to leaf rust in coffee carrying SH3 gene and others SH genes. Brazilian Archives of Biology and Technology, 50(5), 753-757. https://doi.org/10.1590/S1516-89132007000500002
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,269 @@
+---
+title: " Área abaixo da curva de progresso da doença (AACPD)"
+author: "Amanda Pereira Honório & Richard Pardes-Espinosa"
+date: "2024-06-26"
+format: html
+toc: true
+number-sections: true
+code-fold: show
+---
+
+## Preparar dados
+
+Como o *Dataframe* contendo os dados de incidência, severidade e defolha da ferrugem do cafeeiro está localizado em uma planilha do Excel chamada ferrugem, utilizou-se a função `read_excel` do pacote `readxl` para realizar a importação dos dados. O DataFrame foi então atribuído ao objeto denominado `dato`.
+
+```{r}
+# Carregamento pacotes
+library(readxl)
+library(dplyr)
+library(tidyverse)
+```
+
+### Importação dos dados incidência
+
+A tabela contém dados sobre a incidência da ferrugem do cafeeiro ao longo do tempo.
+
+```{r}
+# Chamar dados incidência
+dato1 <- read_excel("ferrugem1.xlsx","Inc")
+dato1
+
+# Formato largo
+df1 <- dato1 |> 
+  pivot_longer(cols = 3:9, 
+               names_to = "time", 
+               values_to = "incidence")
+df1
+```
+
+### Importação dos dados severidade
+
+A tabela contém dados sobre a severidade da ferrugem do cafeeiro ao longo do tempo.
+
+```{r}
+# Chamar dados severity
+dato2 <- read_excel("ferrugem1.xlsx","Sev")
+dato2
+
+# Formato largo
+df2 <- dato2 |> 
+  pivot_longer(cols = 3:9, 
+               names_to = "time", 
+               values_to = "severity")
+df2
+```
+
+### Importação dos dados desfolha
+
+A tabela contém dados sobre a desfolha do cafeeiro ocasionada pela ferrugem do cafeeiro ao longo do tempo.
+
+```{r}
+# Chamar dados defoliation 
+dato3 <- read_excel("ferrugem1.xlsx","Def")
+dato3
+
+# Formato largo
+df3 <- dato3 |> 
+  pivot_longer(cols = 3:9, 
+               names_to = "time", 
+               values_to = "defolation")
+df3
+```
+
+Para que possa ser gerado um gráfico para visualização dos dados, a tabela foi transformada para o formato longo, utilizando a função `pivot_longer`.
+
+
+## Análise exploratória dos dados
+
+Utilizando o pacote `ggplot2`, os dados de incidência, severidade e da desfolha da doença foram explorados visualmente por meio de gráfico de pontos.
+
+Gráfico de pontos: Primeiramente, visualizou-se a distribuição dos pontos de inicidência ao longo do tempo por meio de um gráfico de pontos básico. Como havia muitos pontos e para evitar sobreposição, foi utilizada a função `geom_jitter`, que promove a desagregação dos pontos no gráfico. Dentro desta função, foram definidos o tamanho e a quantidade de deslocamento dos pontos.
+
+Para a incidência:
+
+```{r}
+# Carregar bibliotecas
+library(ggplot2)
+library(ggthemes)
+
+# Crie gráficos e reordene observações em relação ao tempo
+df1$time <- factor(df1$time, levels = c(0, 30, 60, 90, 120, 150, 180))
+
+plot1 <- df1 |> 
+  ggplot(aes(time, incidence), 
+             incidence) + 
+  geom_jitter() + 
+  theme_minimal() + 
+  labs(subtitle = "Progresso da doença",
+       x = "Tempo (dias)", 
+       y = "Incidência (%)") + 
+  theme(axis.text.x = element_text(size = 12, 
+                                   color = "Black", 
+                                   hjust = 0.5, 
+                                   vjust = 1)) + 
+  theme(axis.text.y = element_text(size = 12, 
+                                   color = "Black", 
+                                   hjust = 1, 
+                                   vjust = 0.4),
+        axis.title = element_text(size = 12, color = "black"))
+plot1
+```
+
+Para a severidade:
+
+```{r}
+# Crie gráficos e reordene observações em relação ao tempo
+df2$time <- factor(df2$time, levels = c(0, 30, 60, 90, 120, 150, 180))
+
+plot2 <- df2 |> 
+  ggplot(aes(time, severity), 
+             severity) + 
+  geom_jitter() + 
+  theme_minimal() + 
+  labs(subtitle = "Progresso da doença",
+       x = "Tempo (dias)", 
+       y = "Severidade") + 
+  theme(axis.text.x = element_text(size = 12, 
+                                   color = "Black", 
+                                   hjust = 0.5, 
+                                   vjust = 1)) + 
+  theme(axis.text.y = element_text(size = 12, 
+                                   color = "Black", 
+                                   hjust = 1, 
+                                   vjust = 0.4),
+        axis.title = element_text(size = 12, color = "black"))
+plot2
+```
+
+Para a desfolha:
+
+```{r}
+# Crie gráficos e reordene observações em relação ao tempo
+df3$time <- factor(df3$time, levels = c(0, 30, 60, 90, 120, 150, 180))
+
+plot3 <- df3 |> 
+  ggplot(aes(time, defolation), 
+             defolation) + 
+  geom_jitter() + 
+  theme_minimal() + 
+  labs(subtitle = "Progresso da doença",
+       x = "Tempo (dias)", 
+       y = "Desfolha") + 
+  theme(axis.text.x = element_text(size = 12, 
+                                   color = "Black", 
+                                   hjust = 0.5, 
+                                   vjust = 1)) + 
+  theme(axis.text.y = element_text(size = 12, 
+                                   color = "Black", 
+                                   hjust = 1, 
+                                   vjust = 0.4),
+        axis.title = element_text(size = 12, 
+                                  color = "black"))
+plot3
+```
+
+
+## Cálculo da AACPD
+
+### Transformação de fator e variável
+
+Primeiramente, a variável tempo e incidência/severidade/desfolha são transformadas em caracteres numéricos utilizando as funções `as.numeric` e `as.character` que convertem os valores da coluna tempo em caracteres. Isto é útil se os dados originais estiverem em outro formato (por exemplo, fatores) que precise ser convertido antes de serem numéricos.
+
+```{r}
+# Converter tempo e incidência em variáveis numéricas
+df1$time <- as.numeric(as.character(df1$time))
+df1$incidence <- as.numeric(as.character(df1$incidence))
+
+# Converter tempo e severidade em variáveis numéricas
+df2$time <- as.numeric(as.character(df2$time))
+df2$severity <- as.numeric(as.character(df2$severity))
+
+# Converter tempo e desfolha em variáveis numéricas
+df3$time <- as.numeric(as.character(df3$time))
+df3$defolation <- as.numeric(as.character(df3$defolation))
+```
+
+### Função de cálculo AACPD
+
+Inicialmente é carregada a biblioteca `Agricolae` que permite o processamento dos dados. Ela contém funções específicas para calcular a Área Sob a Curva de Progresso da Doença (AACPD), medida comum em estudos de fitopatologia. Assim, para o cálculo da AACPD foi utilizada a função `AUDPC` do pacote `Agricolae`.
+
+```{r}
+# Carregar bibliotecas 
+library(agricolae)
+library(factoextra)
+```
+
+Foi definida a função `audpcI`, `audpcS` e `audpcD`  com dois argumentos para cada função: `time` e `incidence`, `time` e `severity`, `time` e `defolation`, respectivamente. Dentro delas, é utilizada a função `audpc` para calcular a Área Sob a Curva do Progresso da Doença (AACPD) usando esses valores. O resultado de `audpc` é retornado como saída de `audpcI`, `audpc2` e `audpc3`oferecendo uma maneira simples e reutilizável de calcular a AACPD para dados de epidemia em estudos fitopatológicos.
+
+Para a incidência:
+
+```{r}
+# AUDPC incidence
+audpcI <- function(time, incidence) {
+  return(audpc(incidence, time))
+}
+
+# Agrupar dados por genótipo e repetição
+audpc1 <- df1 |> 
+  group_by(Gen, Rep) |> 
+  summarise(AUDPC = audpcI(time, incidence))
+audpc1
+```
+
+Para a severidade:
+
+```{r}
+# AUDPC severidade 
+audpcS <- function(time, severity) {
+  return(audpc(severity, time))
+}
+# Agrupar dados por genótipo e repetição
+audpc2 <- df2 |> 
+  group_by(Gen, Rep) |> 
+  summarise(AUDPC = audpcS(time, severity))
+audpc2
+```
+
+Para a desfolha:
+
+```{r}
+# AUDPC desfolha 
+audpcD <- function(time, defolation) {
+  return(audpc(defolation, time))
+}
+
+# Agrupar dados por genótipo e repetição
+audpc3 <- df3 |> 
+  group_by(Gen, Rep) |> 
+  summarise(AUDPC = audpcD(time, defolation))
+audpc3
+```
+
+## Novo Dataframe 
+
+Foi criado um novo dataframe com os dados da AACPD de Incidência, Severidade e Desfolha. A função `left_join` do pacote `dplyr` permite combinar duas tabelas. Após obter os cálculos de AACPD para incidência, severidade e desfolha, as tabelas foram unidas  usando `left_join()` com base nas colunas `Gen` e `Rep`. Essa união de tipo esquerda preserva todas as linhas de `audpc1`, adicionando as correspondentes de `audpc2` e `audpc3` onde `Gen` e `Rep` coincidam. O resultado é um novo dataframe `AUDPC` com as colunas combinadas de `audpc1`, `audpc2` e `audpc3` para cada combinação de genótipo (`Gen`) e repetição (`Rep`).
+
+```{r}
+# Unir tabelas
+AUDPC <- audpc1 |> 
+  left_join(audpc2, by = c("Gen", "Rep")) |> 
+  left_join(audpc3, by = c("Gen", "Rep"))
+AUDPC 
+
+# Renomear colunas no data frame
+AUDPC <- AUDPC |> 
+  rename(genotype = Gen, 
+         repetition = Rep,
+         incidence = AUDPC.x,
+         severity = AUDPC.y,
+         defoliation = AUDPC)
+AUDPC
+
+# A função `write.csv` para escrever um data frame
+write.csv(AUDPC, 
+          file = "ferrugem_AUDPC.csv", 
+          row.names = FALSE)
+```
+
+É recomendável renomear as colunas das variáveis para facilitar as estimativas do ANOVA e a comparação de médias. Isso é feito utilizando a função `rename`, que permite mudar os nomes das colunas no DataFrame. Por exemplo, `Gen` é renomeado para `genotype`, `Rep` para `repetition`, `AUDPC.x` (resultante da primeira união) para `incidence`, `AUDPC.y` (resultante da segunda união) para `severity`, e `AUDPC` (resultante da terceira união) para `defoliation`. Finalmente, o DataFrame é exportado para um arquivo CSV usando a função `write.csv()`, o que facilita o armazenamento e a posterior utilização dos dados.
+

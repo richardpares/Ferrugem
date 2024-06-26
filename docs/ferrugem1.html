@@ -1,0 +1,2382 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.551">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Amanda Pereira Honório &amp; Richard Pardes-Espinosa">
+<meta name="dcterms.date" content="2024-06-26">
+
+<title>Ferrugem - ANOVA, Avaliação das premissas e GLMs</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Ferrugem</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./Author.html"> 
+<span class="menu-text">Autores</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#preparar-os-dados" id="toc-preparar-os-dados" class="nav-link active" data-scroll-target="#preparar-os-dados"><span class="header-section-number">1</span> Preparar os dados</a></li>
+  <li><a href="#anova-one-way" id="toc-anova-one-way" class="nav-link" data-scroll-target="#anova-one-way"><span class="header-section-number">2</span> ANOVA (<em>One-way</em>)</a>
+  <ul class="collapse">
+  <li><a href="#aacpd-incidência" id="toc-aacpd-incidência" class="nav-link" data-scroll-target="#aacpd-incidência"><span class="header-section-number">2.1</span> AACPD incidência</a></li>
+  <li><a href="#aacpd-severidade" id="toc-aacpd-severidade" class="nav-link" data-scroll-target="#aacpd-severidade"><span class="header-section-number">2.2</span> AACPD severidade</a></li>
+  <li><a href="#aacpd-desfolha" id="toc-aacpd-desfolha" class="nav-link" data-scroll-target="#aacpd-desfolha"><span class="header-section-number">2.3</span> AACPD desfolha</a></li>
+  </ul></li>
+  <li><a href="#distribuição-da-população" id="toc-distribuição-da-população" class="nav-link" data-scroll-target="#distribuição-da-população"><span class="header-section-number">3</span> Distribuição da população</a></li>
+  <li><a href="#normalidade-e-homocedasticidade" id="toc-normalidade-e-homocedasticidade" class="nav-link" data-scroll-target="#normalidade-e-homocedasticidade"><span class="header-section-number">4</span> Normalidade e Homocedasticidade</a></li>
+  <li><a href="#modelo-linear-generalizado-glm" id="toc-modelo-linear-generalizado-glm" class="nav-link" data-scroll-target="#modelo-linear-generalizado-glm"><span class="header-section-number">5</span> Modelo Linear Generalizado (GLM)</a></li>
+  <li><a href="#comparação-de-médias-scott-knott" id="toc-comparação-de-médias-scott-knott" class="nav-link" data-scroll-target="#comparação-de-médias-scott-knott"><span class="header-section-number">6</span> Comparação de médias (Scott-Knott)</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">ANOVA, Avaliação das premissas e GLMs</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Amanda Pereira Honório &amp; Richard Pardes-Espinosa </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 26, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="preparar-os-dados" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="preparar-os-dados"><span class="header-section-number">1</span> Preparar os dados</h2>
+<p>Carregar o <em>dataframe</em> criado anteriormente: AUDPC Para isso, foram carregados os pacotes abaixo:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Carregar bibliotecas</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ forcats   1.0.0     ✔ readr     2.1.4
+✔ ggplot2   3.5.1     ✔ stringr   1.5.0
+✔ lubridate 1.9.3     ✔ tibble    3.2.1
+✔ purrr     1.0.1     ✔ tidyr     1.3.0</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chamar dataframe</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>AUDPC <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"ferrugem_AUDPC.CSV"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 840 Columns: 5
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+dbl (5): genotype, repetition, incidence, severity, defoliation
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(AUDPC)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>spc_tbl_ [840 × 5] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+ $ genotype   : num [1:840] 1 1 1 1 1 2 2 2 2 2 ...
+ $ repetition : num [1:840] 1 2 3 4 5 1 2 3 4 5 ...
+ $ incidence  : num [1:840] 1700 2203 1933 6559 2250 ...
+ $ severity   : num [1:840] 50.8 28.4 25.7 153.6 40.8 ...
+ $ defoliation: num [1:840] 3212 3575 2925 7075 4538 ...
+ - attr(*, "spec")=
+  .. cols(
+  ..   genotype = col_double(),
+  ..   repetition = col_double(),
+  ..   incidence = col_double(),
+  ..   severity = col_double(),
+  ..   defoliation = col_double()
+  .. )
+ - attr(*, "problems")=&lt;externalptr&gt; </code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reescrevendo o dataframe sem a coluna Repetition</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>AUDPC <span class="ot">&lt;-</span> AUDPC[,<span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>)]  </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>AUDPC</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 840 × 4
+   genotype incidence severity defoliation
+      &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;       &lt;dbl&gt;
+ 1        1     1700      50.8       3212.
+ 2        1     2203.     28.4       3575 
+ 3        1     1933.     25.7       2925 
+ 4        1     6559.    154.        7075 
+ 5        1     2250      40.8       4538.
+ 6        2     8333.    167.        4875 
+ 7        2     7585.    144.        3900 
+ 8        2     7959.    149.        6238.
+ 9        2     6292.    168.        5375 
+10        2     4347.     95.1       5600 
+# ℹ 830 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="anova-one-way" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="anova-one-way"><span class="header-section-number">2</span> ANOVA (<em>One-way</em>)</h2>
+<p>Após calcular as variáveis de resposta da AACPD para a incidência, severidade e desfolha, avaliou-se o ANOVA (One-way ANOVA). Para isso, formulamos as seguintes hipóteses:</p>
+<p><strong>Hipótese nula (Ho):</strong> propõe que todas as médias são iguais.</p>
+<p><strong>Hipótese alternativa (Ha):</strong> sugere que pelo menos uma média é diferente.</p>
+<p>A significância dos resultados foi avaliada utilizando um <strong>p-valor &lt; 0,05</strong>.</p>
+<p>Para comparar as médias da incidência/severidade/desfolha entre os diferentes genótipos, foi utilizado a função <code>aov</code>. Em seguida, com <code>summary</code>, foi extraido um resumo do modelo ajustado que inclui os estatísticos F, valores p, graus de liberdade e somas de quadrados.</p>
+<section id="aacpd-incidência" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="aacpd-incidência"><span class="header-section-number">2.1</span> AACPD incidência</h3>
+<p>Em continuação, criamos um objeto chamado <strong>av1</strong> para a variável inicidence, o qual conterá os dados da ANOVA.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Converter genotype a fator</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>AUDPC<span class="sc">$</span>genotype <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(AUDPC<span class="sc">$</span>genotype)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># AUDPC incidence</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>av1 <span class="ot">&lt;-</span> <span class="fu">aov</span>(incidence <span class="sc">~</span> genotype, </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">data =</span> AUDPC)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(av1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>             Df    Sum Sq  Mean Sq F value Pr(&gt;F)    
+genotype    167 7.098e+09 42501668   18.91 &lt;2e-16 ***
+Residuals   672 1.510e+09  2247179                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>Com base nas tabelas de ANOVA, interpreta-se que, com valores de <strong>p&lt;2e-16</strong> inferiores ao nível de significância (0,05), rejeitamos a hipótese nula e aceitamos a hipótese alternativa. Isso indica evidência estatística de que pelo menos um dos tratamentos apresenta diferença significativa na AACPD da incidência em comparação com os demais genótipos.</p>
+</section>
+<section id="aacpd-severidade" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="aacpd-severidade"><span class="header-section-number">2.2</span> AACPD severidade</h3>
+<p>Em continuação, criamos um objeto chamado <strong>av2</strong> para a variável severity, o qual conterá os dados da ANOVA.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AUDPC severity</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>av2 <span class="ot">&lt;-</span> <span class="fu">aov</span>(severity <span class="sc">~</span> genotype, </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">data =</span> AUDPC)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(av2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>             Df  Sum Sq Mean Sq F value Pr(&gt;F)    
+genotype    167 5629009   33707   22.41 &lt;2e-16 ***
+Residuals   672 1010538    1504                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>Com base nos resultados da ANOVA, interpreta-se que, dado que o valor de <strong>p&lt;2e-16</strong> foi menor que o nível de significância de 0,05, a hipótese nula é rejeitada em favor da hipótese alternativa. Isso indica que há evidência estatística de que pelo menos um dos tratamentos apresenta uma diferença significativa na AACPD de severidade em comparação com os demais genotipos.</p>
+</section>
+<section id="aacpd-desfolha" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="aacpd-desfolha"><span class="header-section-number">2.3</span> AACPD desfolha</h3>
+<p>Em continuação, criamos um objeto chamado <strong>av3</strong> para a variável defoliation, o qual conterá os dados da ANOVA.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AUDPC defoliation</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>av3 <span class="ot">&lt;-</span> <span class="fu">aov</span>(defoliation <span class="sc">~</span> genotype, </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">data =</span> AUDPC)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(av3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>             Df   Sum Sq  Mean Sq F value Pr(&gt;F)    
+genotype    167 2.95e+09 17662242    6.38 &lt;2e-16 ***
+Residuals   672 1.86e+09  2768593                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>A partir dos resultados da ANOVA, conclui-se que, dado que os valores de <strong>&lt;2e-16</strong> foram inferiores ao nível de significância (0,05), rejeita-se a hipótese nula em favor da hipótese alternativa. Isso indica que há evidência estatística de que pelo menos um dos tratamentos apresenta diferença significativa na AACPD da desfolha em comparação com os outros tratamentos.</p>
+</section>
+</section>
+<section id="distribuição-da-população" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="distribuição-da-população"><span class="header-section-number">3</span> Distribuição da população</h2>
+<p>Os resíduos de três modelos ANOVA foram extraídos e foram criados data frames para cada variável utilizando as funções <code>residuals</code> e <code>data.frame</code>.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extrair resíduos das três variáveis</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>residuals1 <span class="ot">&lt;-</span> <span class="fu">residuals</span>(av1)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>residuals2 <span class="ot">&lt;-</span> <span class="fu">residuals</span>(av2)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>residuals3 <span class="ot">&lt;-</span> <span class="fu">residuals</span>(av3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Os dataframes residuals1.df, residuals2.df e residuals3.df contêm os resíduos dos modelos ANOVA para cada uma das três variáveis (incidência/severidade/desfolha). Esses resíduos são úteis para verificar os pressupostos do modelo, como a normalidade dos erros e a homogeneidade das variâncias. Além disso, podem ser utilizados para realizar análises adicionais, como a detecção de valores atípicos ou a avaliação da adequação do modelo.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar um dataframe com os resíduos</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>residuals1.df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">residuals =</span> residuals1)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>residuals2.df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">residuals =</span> residuals2)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>residuals3.df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">residuals =</span> residuals3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Agora vamos visualizar a distribuição da população para as três variáveis de resposta. Criamos três gráficos: plot1 mostra um histograma dos resíduos do ANOVA para AACPD da incidência, avaliando sua distribuição ao redor de zero para verificar a normalidade dos resíduos. Este mesmo procedimento foi aplicado às outras duas variáveis: AACPD da severidade (plot2) e AACPD da desfolha (plot3). Esses gráficos são essenciais para validar os pressupostos do ANOVA.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Histograma AUDPC incidencia</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>plot1 <span class="ot">&lt;-</span> residuals1.df <span class="sc">|&gt;</span> </span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> residuals1)) <span class="sc">+</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">10</span>, </span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color =</span> <span class="st">"black"</span>, </span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">fill =</span> <span class="st">"orange"</span>) <span class="sc">+</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Distribuição da Incidência, Severidade e Desfolha"</span>,</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">x =</span> <span class="st">"Resíduos"</span>,</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">y =</span> <span class="st">"Frequência"</span>) <span class="sc">+</span> </span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, </span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">color =</span> <span class="st">"Black"</span>, </span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">hjust =</span> <span class="fl">0.5</span>, </span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">vjust =</span> <span class="dv">1</span>)) <span class="sc">+</span> </span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, </span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">color =</span> <span class="st">"Black"</span>, </span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">hjust =</span> <span class="dv">1</span>, </span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">vjust =</span> <span class="fl">0.4</span>),</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">color =</span> <span class="st">"black"</span>))</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>plot1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ferrugem1_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Histograma AUDPC severity</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>plot2 <span class="ot">&lt;-</span> residuals2.df <span class="sc">|&gt;</span> </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> residuals2)) <span class="sc">+</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">10</span>, </span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color =</span> <span class="st">"black"</span>, </span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">fill =</span> <span class="st">"#00FF7F"</span>) <span class="sc">+</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">""</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">x =</span> <span class="st">"Resíduos"</span>,</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">y =</span> <span class="st">"Frequência"</span>) <span class="sc">+</span> </span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, </span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">color =</span> <span class="st">"Black"</span>, </span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">hjust =</span> <span class="fl">0.5</span>, </span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">vjust =</span> <span class="dv">1</span>)) <span class="sc">+</span> </span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, </span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">color =</span> <span class="st">"Black"</span>, </span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">hjust =</span> <span class="dv">1</span>, </span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">vjust =</span> <span class="fl">0.4</span>),</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">color =</span> <span class="st">"black"</span>))</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>plot2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ferrugem1_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Histograma AUDPC defoliation</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>plot3 <span class="ot">&lt;-</span> residuals3.df <span class="sc">|&gt;</span> </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> residuals3)) <span class="sc">+</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">10</span>, </span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color =</span> <span class="st">"black"</span>, </span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">fill =</span> <span class="st">"#BF3EFF"</span>) <span class="sc">+</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">""</span>,</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">x =</span> <span class="st">"Resíduos"</span>,</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">y =</span> <span class="st">"Frequência"</span>) <span class="sc">+</span> </span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, </span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">color =</span> <span class="st">"Black"</span>, </span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">hjust =</span> <span class="fl">0.5</span>, </span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">vjust =</span> <span class="dv">1</span>)) <span class="sc">+</span> </span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, </span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">color =</span> <span class="st">"Black"</span>, </span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">hjust =</span> <span class="dv">1</span>, </span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">vjust =</span> <span class="fl">0.4</span>),</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">color =</span> <span class="st">"black"</span>))</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>plot3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ferrugem1_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A seguir, os gráficos criados foram unidos utilizando o pacote <code>patchwork</code>:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Carregar bibliotecas</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine plots</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>plot1 <span class="sc">+</span> plot2 <span class="sc">+</span> plot3 </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ferrugem1_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="normalidade-e-homocedasticidade" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="normalidade-e-homocedasticidade"><span class="header-section-number">4</span> Normalidade e Homocedasticidade</h2>
+<p>Foram avaliados os pressupostos utilizando o pacote <code>performance</code> e <code>DHARMa</code>, que analisa os resíduos dos modelos ajustados. Utilizamos os modelos av1, av2 e av3, correspondentes aos AACPD para incidência, severidade e desfolha, respectivamente.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Carregar bibliotecas</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(performance)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DHARMa)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>This is DHARMa 0.4.6. For overview type '?DHARMa'. For recent changes, type news(package = 'DHARMa')</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Checar as premissas</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">check_normality</span>(av1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Warning: Non-normality of residuals detected (p &lt; .001).</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">check_heteroscedasticity</span>(av1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Warning: Heteroscedasticity (non-constant error variance) detected (p &lt; .001).</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">simulateResiduals</span>(av1))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in checkModel(fittedModel): DHARMa: fittedModel not in class of
+supported models. Absolutely no guarantee that this will work!</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ferrugem1_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">check_normality</span>(av2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Warning: Non-normality of residuals detected (p &lt; .001).</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">check_heteroscedasticity</span>(av2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Warning: Heteroscedasticity (non-constant error variance) detected (p &lt; .001).</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">simulateResiduals</span>(av2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in checkModel(fittedModel): DHARMa: fittedModel not in class of
+supported models. Absolutely no guarantee that this will work!</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ferrugem1_files/figure-html/unnamed-chunk-11-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">check_normality</span>(av3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Warning: Non-normality of residuals detected (p = 0.006).</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">check_heteroscedasticity</span>(av3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Warning: Heteroscedasticity (non-constant error variance) detected (p &lt; .001).</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">simulateResiduals</span>(av3))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in checkModel(fittedModel): DHARMa: fittedModel not in class of
+supported models. Absolutely no guarantee that this will work!</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ferrugem1_files/figure-html/unnamed-chunk-11-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Com o suporte do pacote <code>DHARMa</code>, geramos gráficos visuais para avaliar os pressupostos de normalidade e homocedasticidade. Em resumo, as variáveis AACPD Incidência e AACPD Severidade não atenderam à premissa de distribuição normal dos dados (<strong>p &lt; .001</strong>), mas atenderam à igualdade de variâncias (homocedasticidade) (<strong>p &lt; .001</strong>; <strong>p &lt; .001</strong>). Por outro lado, a variável AACPD desfolha atendeu aos pressupostos de normalidade e homocedasticidade (<strong>p = 0.015</strong>; <strong>p &lt; .001</strong>). Portanto, para detectar diferenças estatísticas entre os genótipos, utilizaremos o modelo linear generalizado (GLM).</p>
+</section>
+<section id="modelo-linear-generalizado-glm" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="modelo-linear-generalizado-glm"><span class="header-section-number">5</span> Modelo Linear Generalizado (GLM)</h2>
+<p>Foi utilizado o modelo linear generalizado (GLM) para determinar as diferenças significativas entre os genótipos de cafeeiro. Para esta análise, foram utilizados os pacotes <code>faraway</code> e <code>MASS</code>.</p>
+<p><strong>Variáveis AACPD incidência</strong></p>
+<p>Utilizamos a função <code>glm</code> para criar um modelo linear generalizado. O conjunto de dados AUDPC contém essas informações.A função <code>summary</code> aplicada ao objeto glm.Inc fornece um resumo detalhado do modelo ajustado. Isso também foi realizado para AACPD severidade (glm.Sev) e AACPD desfolha (glm.Def).</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Carregar bibliotecas </span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(faraway)      </span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS)    </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'MASS'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:patchwork':
+
+    area</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:dplyr':
+
+    select</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Converter genotype a fator</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>AUDPC<span class="sc">$</span>genotype <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(AUDPC<span class="sc">$</span>genotype)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="co"># AUDCP Incidencia </span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>glm.Inc <span class="ot">&lt;-</span> <span class="fu">glm</span>(incidence <span class="sc">~</span> genotype,</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> AUDPC,</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">family =</span> <span class="fu">gaussian</span>())  <span class="co">#gaussian, poisson, quasipoisson</span></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(glm.Inc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = incidence ~ genotype, family = gaussian(), data = AUDPC)
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  2928.91     670.40   4.369 1.45e-05 ***
+genotype2    3974.19     948.09   4.192 3.14e-05 ***
+genotype3    3839.13     948.09   4.049 5.73e-05 ***
+genotype4    5280.06     948.09   5.569 3.70e-08 ***
+genotype5    5500.26     948.09   5.801 1.01e-08 ***
+genotype6    4149.84     948.09   4.377 1.39e-05 ***
+genotype7   -1005.02     948.09  -1.060 0.289503    
+genotype8    5049.19     948.09   5.326 1.37e-07 ***
+genotype9    6017.12     948.09   6.347 4.05e-10 ***
+genotype10  -1069.56     948.09  -1.128 0.259669    
+genotype11   1477.24     948.09   1.558 0.119674    
+genotype12   3953.28     948.09   4.170 3.45e-05 ***
+genotype13   4674.03     948.09   4.930 1.04e-06 ***
+genotype14   5885.85     948.09   6.208 9.39e-10 ***
+genotype15   6574.92     948.09   6.935 9.56e-12 ***
+genotype16  -1307.24     948.09  -1.379 0.168409    
+genotype17   4055.58     948.09   4.278 2.16e-05 ***
+genotype18   4106.73     948.09   4.332 1.71e-05 ***
+genotype19   4358.59     948.09   4.597 5.12e-06 ***
+genotype20  -2032.30     948.09  -2.144 0.032425 *  
+genotype21   5427.72     948.09   5.725 1.56e-08 ***
+genotype22   6159.19     948.09   6.496 1.60e-10 ***
+genotype23   6551.69     948.09   6.910 1.12e-11 ***
+genotype24   2570.14     948.09   2.711 0.006882 ** 
+genotype25   3952.58     948.09   4.169 3.46e-05 ***
+genotype26  -1962.88     948.09  -2.070 0.038801 *  
+genotype27  -1096.23     948.09  -1.156 0.247989    
+genotype28   -549.01     948.09  -0.579 0.562737    
+genotype29    397.49     948.09   0.419 0.675166    
+genotype30   3621.13     948.09   3.819 0.000146 ***
+genotype31   6797.04     948.09   7.169 1.99e-12 ***
+genotype32   5726.92     948.09   6.040 2.54e-09 ***
+genotype33   3405.93     948.09   3.592 0.000352 ***
+genotype34  -1910.24     948.09  -2.015 0.044320 *  
+genotype35   1477.24     948.09   1.558 0.119674    
+genotype36   4826.89     948.09   5.091 4.63e-07 ***
+genotype37     87.96     948.09   0.093 0.926112    
+genotype38  -1978.21     948.09  -2.087 0.037307 *  
+genotype39  -1439.74     948.09  -1.519 0.129340    
+genotype40   3822.78     948.09   4.032 6.16e-05 ***
+genotype41   3766.13     948.09   3.972 7.89e-05 ***
+genotype42   -465.28     948.09  -0.491 0.623761    
+genotype43   -897.12     948.09  -0.946 0.344364    
+genotype44   3973.49     948.09   4.191 3.15e-05 ***
+genotype45   6095.26     948.09   6.429 2.44e-10 ***
+genotype46  -2302.68     948.09  -2.429 0.015412 *  
+genotype47    234.96     948.09   0.248 0.804345    
+genotype48   6188.95     948.09   6.528 1.32e-10 ***
+genotype49   3441.31     948.09   3.630 0.000305 ***
+genotype50    318.29     948.09   0.336 0.737186    
+genotype51   1972.88     948.09   2.081 0.037821 *  
+genotype52  -1130.63     948.09  -1.193 0.233470    
+genotype53  -2533.91     948.09  -2.673 0.007708 ** 
+genotype54  -1662.66     948.09  -1.754 0.079939 .  
+genotype55   4953.99     948.09   5.225 2.32e-07 ***
+genotype56   2397.88     948.09   2.529 0.011661 *  
+genotype57   -413.63     948.09  -0.436 0.662775    
+genotype58   -143.53     948.09  -0.151 0.879713    
+genotype59   1704.94     948.09   1.798 0.072579 .  
+genotype60   4646.49     948.09   4.901 1.20e-06 ***
+genotype61   4850.28     948.09   5.116 4.08e-07 ***
+genotype62  -1453.91     948.09  -1.534 0.125619    
+genotype63  -1506.03     948.09  -1.588 0.112645    
+genotype64   3752.12     948.09   3.958 8.38e-05 ***
+genotype65  -1460.81     948.09  -1.541 0.123837    
+genotype66   5344.15     948.09   5.637 2.55e-08 ***
+genotype67   1334.37     948.09   1.407 0.159763    
+genotype68   5176.25     948.09   5.460 6.72e-08 ***
+genotype69   -702.40     948.09  -0.741 0.459037    
+genotype70  -1985.26     948.09  -2.094 0.036638 *  
+genotype71    743.13     948.09   0.784 0.433419    
+genotype72   5621.21     948.09   5.929 4.87e-09 ***
+genotype73   7342.52     948.09   7.745 3.54e-14 ***
+genotype74  -1607.16     948.09  -1.695 0.090508 .  
+genotype75   5845.95     948.09   6.166 1.21e-09 ***
+genotype76   3894.74     948.09   4.108 4.48e-05 ***
+genotype77   2492.42     948.09   2.629 0.008762 ** 
+genotype78   -365.97     948.09  -0.386 0.699611    
+genotype79    199.38     948.09   0.210 0.833496    
+genotype80   3914.70     948.09   4.129 4.10e-05 ***
+genotype81   6005.93     948.09   6.335 4.35e-10 ***
+genotype82   3409.46     948.09   3.596 0.000347 ***
+genotype83   5604.05     948.09   5.911 5.41e-09 ***
+genotype84   6321.79     948.09   6.668 5.42e-11 ***
+genotype98   5268.71     948.09   5.557 3.95e-08 ***
+genotype100  5704.94     948.09   6.017 2.91e-09 ***
+genotype101  6345.26     948.09   6.693 4.62e-11 ***
+genotype103  4825.34     948.09   5.090 4.66e-07 ***
+genotype104  -511.43     948.09  -0.539 0.589768    
+genotype105  4413.13     948.09   4.655 3.91e-06 ***
+genotype108  5546.01     948.09   5.850 7.69e-09 ***
+genotype110 -2475.81     948.09  -2.611 0.009219 ** 
+genotype112  -394.07     948.09  -0.416 0.677803    
+genotype113   583.21     948.09   0.615 0.538666    
+genotype114  6100.79     948.09   6.435 2.35e-10 ***
+genotype117 -2208.91     948.09  -2.330 0.020109 *  
+genotype119  3525.98     948.09   3.719 0.000217 ***
+genotype120  1593.27     948.09   1.681 0.093323 .  
+genotype122 -1737.96     948.09  -1.833 0.067227 .  
+genotype123   721.98     948.09   0.762 0.446616    
+genotype124   829.44     948.09   0.875 0.381963    
+genotype126  4750.24     948.09   5.010 6.95e-07 ***
+genotype130 -1382.18     948.09  -1.458 0.145346    
+genotype131  6345.06     948.09   6.692 4.63e-11 ***
+genotype133  5831.57     948.09   6.151 1.32e-09 ***
+genotype134 -1367.10     948.09  -1.442 0.149780    
+genotype135  -603.45     948.09  -0.636 0.524671    
+genotype136  4693.12     948.09   4.950 9.39e-07 ***
+genotype137  6020.00     948.09   6.350 3.97e-10 ***
+genotype138  4697.06     948.09   4.954 9.20e-07 ***
+genotype139  4758.23     948.09   5.019 6.67e-07 ***
+genotype140  4709.95     948.09   4.968 8.60e-07 ***
+genotype141  5489.08     948.09   5.790 1.08e-08 ***
+genotype142  3704.90     948.09   3.908 0.000103 ***
+genotype143  4387.92     948.09   4.628 4.43e-06 ***
+genotype144  2458.39     948.09   2.593 0.009721 ** 
+genotype145  6626.47     948.09   6.989 6.67e-12 ***
+genotype146  5420.93     948.09   5.718 1.62e-08 ***
+genotype147  6855.89     948.09   7.231 1.31e-12 ***
+genotype149  -562.64     948.09  -0.593 0.553083    
+genotype150  6884.00     948.09   7.261 1.07e-12 ***
+genotype152  4678.43     948.09   4.935 1.01e-06 ***
+genotype153  7535.62     948.09   7.948 8.00e-15 ***
+genotype154  6421.09     948.09   6.773 2.76e-11 ***
+genotype155  6561.73     948.09   6.921 1.05e-11 ***
+genotype156  2622.88     948.09   2.766 0.005822 ** 
+genotype157  8237.30     948.09   8.688  &lt; 2e-16 ***
+genotype158  2714.35     948.09   2.863 0.004328 ** 
+genotype159  2103.92     948.09   2.219 0.026812 *  
+genotype160  4237.84     948.09   4.470 9.18e-06 ***
+genotype161  3268.04     948.09   3.447 0.000602 ***
+genotype162   116.13     948.09   0.122 0.902548    
+genotype163  1481.01     948.09   1.562 0.118734    
+genotype164  7029.66     948.09   7.415 3.69e-13 ***
+genotype165  1297.44     948.09   1.368 0.171619    
+genotype166  -397.28     948.09  -0.419 0.675325    
+genotype167  6188.41     948.09   6.527 1.32e-10 ***
+genotype168  5729.66     948.09   6.043 2.50e-09 ***
+genotype169  7068.22     948.09   7.455 2.77e-13 ***
+genotype171  4650.00     948.09   4.905 1.18e-06 ***
+genotype172  3530.01     948.09   3.723 0.000213 ***
+genotype173   -45.75     948.09  -0.048 0.961524    
+genotype174   -77.64     948.09  -0.082 0.934759    
+genotype183  -943.19     948.09  -0.995 0.320173    
+genotype199  1623.93     948.09   1.713 0.087202 .  
+genotype200  5042.40     948.09   5.318 1.43e-07 ***
+genotype203 -2424.15     948.09  -2.557 0.010780 *  
+genotype205  1294.60     948.09   1.365 0.172557    
+genotype212  3399.82     948.09   3.586 0.000360 ***
+genotype213  5983.23     948.09   6.311 5.04e-10 ***
+genotype214  6220.38     948.09   6.561 1.07e-10 ***
+genotype216  4996.09     948.09   5.270 1.84e-07 ***
+genotype218  1485.95     948.09   1.567 0.117512    
+genotype219  5433.39     948.09   5.731 1.51e-08 ***
+genotype220  5361.16     948.09   5.655 2.31e-08 ***
+genotype222  1614.42     948.09   1.703 0.089064 .  
+genotype226  1010.56     948.09   1.066 0.286857    
+genotype228  5399.88     948.09   5.696 1.84e-08 ***
+genotype229  5784.35     948.09   6.101 1.78e-09 ***
+genotype230   457.90     948.09   0.483 0.629275    
+genotype232  5467.20     948.09   5.767 1.23e-08 ***
+genotype233  4438.87     948.09   4.682 3.44e-06 ***
+genotype236  3853.43     948.09   4.064 5.38e-05 ***
+genotype237  7325.38     948.09   7.726 4.03e-14 ***
+genotype242  6159.90     948.09   6.497 1.59e-10 ***
+genotype245  4178.31     948.09   4.407 1.22e-05 ***
+genotype248  2959.86     948.09   3.122 0.001874 ** 
+genotype249  2005.48     948.09   2.115 0.034773 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for gaussian family taken to be 2247179)
+
+    Null deviance: 8607883053  on 839  degrees of freedom
+Residual deviance: 1510104522  on 672  degrees of freedom
+AIC: 14820
+
+Number of Fisher Scoring iterations: 2</code></pre>
+</div>
+</div>
+<p><strong>Variável AACPD severidade</strong></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AUDPC Severidad</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>glm.Sev <span class="ot">&lt;-</span> <span class="fu">glm</span>(severity <span class="sc">~</span> genotype,</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> AUDPC,</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">family =</span> <span class="fu">quasipoisson</span>())  <span class="co"># gaussian, poisson, quasipoisson</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(glm.Sev)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = severity ~ genotype, family = quasipoisson(), data = AUDPC)
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   4.09134    0.19051  21.476  &lt; 2e-16 ***
+genotype2     0.88226    0.22653   3.895 0.000108 ***
+genotype3     0.80490    0.22918   3.512 0.000474 ***
+genotype4     0.98927    0.22314   4.433 1.08e-05 ***
+genotype5     1.12906    0.21916   5.152 3.39e-07 ***
+genotype6     0.97046    0.22371   4.338 1.66e-05 ***
+genotype7    -1.62042    0.46880  -3.457 0.000582 ***
+genotype8     1.09709    0.22003   4.986 7.85e-07 ***
+genotype9     1.10454    0.21982   5.025 6.47e-07 ***
+genotype10   -0.88499    0.35247  -2.511 0.012279 *  
+genotype11   -0.30834    0.29274  -1.053 0.292592    
+genotype12    0.95055    0.22433   4.237 2.58e-05 ***
+genotype13    0.96010    0.22403   4.286 2.09e-05 ***
+genotype14    1.15637    0.21843   5.294 1.62e-07 ***
+genotype15    1.37189    0.21331   6.432 2.40e-10 ***
+genotype16   -3.05579    0.89840  -3.401 0.000710 ***
+genotype17    1.14381    0.21876   5.228 2.28e-07 ***
+genotype18    0.93139    0.22493   4.141 3.90e-05 ***
+genotype19    1.08286    0.22042   4.913 1.13e-06 ***
+genotype20   -3.30822    1.01413  -3.262 0.001162 ** 
+genotype21    1.21017    0.21706   5.575 3.58e-08 ***
+genotype22    1.28698    0.21521   5.980 3.62e-09 ***
+genotype23    1.29529    0.21502   6.024 2.80e-09 ***
+genotype24    0.20128    0.25685   0.784 0.433523    
+genotype25    0.96910    0.22375   4.331 1.71e-05 ***
+genotype26   -2.27553    0.62414  -3.646 0.000287 ***
+genotype27   -1.76308    0.49790  -3.541 0.000426 ***
+genotype28   -1.35190    0.42019  -3.217 0.001356 ** 
+genotype29    0.12774    0.26122   0.489 0.624998    
+genotype30    0.95316    0.22425   4.251 2.43e-05 ***
+genotype31    1.25511    0.21596   5.812 9.55e-09 ***
+genotype32    1.09252    0.22015   4.963 8.82e-07 ***
+genotype33    0.93348    0.22487   4.151 3.73e-05 ***
+genotype34   -1.13374    0.38610  -2.936 0.003434 ** 
+genotype35   -0.30834    0.29274  -1.053 0.292592    
+genotype36    1.28883    0.21517   5.990 3.42e-09 ***
+genotype37   -0.41488    0.30208  -1.373 0.170076    
+genotype38   -1.42778    0.43315  -3.296 0.001031 ** 
+genotype39   -1.33738    0.41778  -3.201 0.001433 ** 
+genotype40    0.78287    0.22997   3.404 0.000703 ***
+genotype41    0.81943    0.22867   3.583 0.000364 ***
+genotype42   -0.19867    0.28384  -0.700 0.484210    
+genotype43   -0.89435    0.35364  -2.529 0.011667 *  
+genotype44    0.96505    0.22388   4.311 1.87e-05 ***
+genotype45    1.14507    0.21873   5.235 2.21e-07 ***
+genotype46   -2.67264    0.74951  -3.566 0.000388 ***
+genotype47   -1.01686    0.36964  -2.751 0.006102 ** 
+genotype48    1.38551    0.21301   6.504 1.52e-10 ***
+genotype49    0.73426    0.23176   3.168 0.001603 ** 
+genotype50   -0.14149    0.27947  -0.506 0.612838    
+genotype51    0.78771    0.22979   3.428 0.000645 ***
+genotype52   -1.72045    0.48895  -3.519 0.000463 ***
+genotype53   -4.19670    1.56482  -2.682 0.007500 ** 
+genotype54   -1.21023    0.39754  -3.044 0.002423 ** 
+genotype55    1.21123    0.21703   5.581 3.47e-08 ***
+genotype56   -0.03650    0.27192  -0.134 0.893250    
+genotype57   -0.82469    0.34509  -2.390 0.017134 *  
+genotype58   -0.16948    0.28159  -0.602 0.547469    
+genotype59    0.69334    0.23332   2.972 0.003068 ** 
+genotype60    1.12262    0.21933   5.118 4.03e-07 ***
+genotype61    1.11857    0.21944   5.097 4.48e-07 ***
+genotype62   -5.98846    3.80927  -1.572 0.116404    
+genotype63   -1.69118    0.48293  -3.502 0.000493 ***
+genotype64    0.85655    0.22739   3.767 0.000180 ***
+genotype65   -2.33657    0.64170  -3.641 0.000292 ***
+genotype66    1.29291    0.21507   6.011 3.02e-09 ***
+genotype67    0.06836    0.26494   0.258 0.796465    
+genotype68    1.29407    0.21505   6.018 2.91e-09 ***
+genotype69   -1.26229    0.40564  -3.112 0.001938 ** 
+genotype70   -3.96338    1.39523  -2.841 0.004638 ** 
+genotype71    0.31450    0.25059   1.255 0.209904    
+genotype72    1.27602    0.21547   5.922 5.07e-09 ***
+genotype73    1.46952    0.21129   6.955 8.38e-12 ***
+genotype74   -1.37321    0.42378  -3.240 0.001252 ** 
+genotype75    1.45836    0.21151   6.895 1.24e-11 ***
+genotype76    1.09545    0.22007   4.978 8.19e-07 ***
+genotype77    0.92433    0.22516   4.105 4.54e-05 ***
+genotype78   -0.55173    0.31514  -1.751 0.080444 .  
+genotype79   -0.07106    0.27434  -0.259 0.795693    
+genotype80    0.94228    0.22459   4.196 3.09e-05 ***
+genotype81    1.30236    0.21485   6.062 2.25e-09 ***
+genotype82    0.69864    0.23311   2.997 0.002827 ** 
+genotype83    1.13217    0.21907   5.168 3.12e-07 ***
+genotype84    1.40428    0.21262   6.605 8.10e-11 ***
+genotype98    1.14396    0.21876   5.229 2.28e-07 ***
+genotype100   1.12763    0.21920   5.144 3.53e-07 ***
+genotype101   1.26508    0.21573   5.864 7.07e-09 ***
+genotype103   1.10323    0.21986   5.018 6.69e-07 ***
+genotype104  -1.13478    0.38625  -2.938 0.003417 ** 
+genotype105   0.83222    0.22822   3.647 0.000286 ***
+genotype108   1.00642    0.22262   4.521 7.28e-06 ***
+genotype110  -2.82977    0.80696  -3.507 0.000484 ***
+genotype112  -0.16292    0.28109  -0.580 0.562374    
+genotype113   0.07032    0.26481   0.266 0.790670    
+genotype114   1.36360    0.21349   6.387 3.15e-10 ***
+genotype117 -17.39393  691.53851  -0.025 0.979941    
+genotype119   0.98760    0.22319   4.425 1.13e-05 ***
+genotype120   0.21325    0.25616   0.832 0.405433    
+genotype122  -1.54134    0.45367  -3.397 0.000720 ***
+genotype123  -0.18460    0.28275  -0.653 0.514066    
+genotype124  -0.13884    0.27928  -0.497 0.619254    
+genotype126   0.94809    0.22441   4.225 2.72e-05 ***
+genotype130  -1.89312    0.52659  -3.595 0.000348 ***
+genotype131   1.25112    0.21606   5.791 1.08e-08 ***
+genotype133   1.30236    0.21485   6.062 2.25e-09 ***
+genotype134  -1.98704    0.54866  -3.622 0.000315 ***
+genotype135  -0.99990    0.36735  -2.722 0.006658 ** 
+genotype136   0.98508    0.22326   4.412 1.19e-05 ***
+genotype137   1.30936    0.21469   6.099 1.80e-09 ***
+genotype138   1.04537    0.22148   4.720 2.87e-06 ***
+genotype139   1.21197    0.21702   5.585 3.40e-08 ***
+genotype140   1.21979    0.21682   5.626 2.71e-08 ***
+genotype141   1.22123    0.21679   5.633 2.60e-08 ***
+genotype142   0.82060    0.22863   3.589 0.000356 ***
+genotype143   1.08803    0.22028   4.939 9.90e-07 ***
+genotype144   0.49246    0.24182   2.037 0.042089 *  
+genotype145   1.36378    0.21348   6.388 3.13e-10 ***
+genotype146   1.15282    0.21853   5.275 1.79e-07 ***
+genotype147   1.48918    0.21091   7.061 4.14e-12 ***
+genotype149  -0.98293    0.36508  -2.692 0.007272 ** 
+genotype150   1.50311    0.21064   7.136 2.50e-12 ***
+genotype152   1.27657    0.21545   5.925 4.99e-09 ***
+genotype153   1.55119    0.20974   7.396 4.20e-13 ***
+genotype154   1.12142    0.21936   5.112 4.16e-07 ***
+genotype155   1.34668    0.21386   6.297 5.48e-10 ***
+genotype156   0.36814    0.24781   1.486 0.137867    
+genotype157   1.49723    0.21075   7.104 3.09e-12 ***
+genotype158   0.62233    0.23616   2.635 0.008604 ** 
+genotype159   0.57956    0.23796   2.436 0.015129 *  
+genotype160   0.72281    0.23219   3.113 0.001930 ** 
+genotype161   0.79024    0.22970   3.440 0.000617 ***
+genotype162  -0.27432    0.28990  -0.946 0.344370    
+genotype163   0.32671    0.24995   1.307 0.191626    
+genotype164   1.37048    0.21334   6.424 2.51e-10 ***
+genotype165  -0.01138    0.27019  -0.042 0.966422    
+genotype166  -0.40140    0.30086  -1.334 0.182600    
+genotype167   1.33189    0.21419   6.218 8.82e-10 ***
+genotype168   1.27798    0.21542   5.932 4.78e-09 ***
+genotype169   1.46946    0.21129   6.955 8.39e-12 ***
+genotype171   0.93497    0.22482   4.159 3.61e-05 ***
+genotype172   0.88461    0.22645   3.906 0.000103 ***
+genotype173  -0.33943    0.29539  -1.149 0.250938    
+genotype174  -1.27432    0.40755  -3.127 0.001843 ** 
+genotype183  -0.69543    0.33023  -2.106 0.035582 *  
+genotype199   0.34011    0.24925   1.365 0.172853    
+genotype200   1.12743    0.21920   5.143 3.54e-07 ***
+genotype203  -3.85872    1.32545  -2.911 0.003719 ** 
+genotype205   0.62683    0.23598   2.656 0.008088 ** 
+genotype212   0.53128    0.24006   2.213 0.027228 *  
+genotype213   1.20528    0.21718   5.550 4.12e-08 ***
+genotype214   1.27676    0.21545   5.926 4.96e-09 ***
+genotype216   1.14396    0.21876   5.229 2.28e-07 ***
+genotype218   0.13153    0.26099   0.504 0.614463    
+genotype219   1.32013    0.21445   6.156 1.28e-09 ***
+genotype220   1.19816    0.21736   5.512 5.05e-08 ***
+genotype222  -0.03256    0.27164  -0.120 0.904633    
+genotype226   0.39608    0.24641   1.607 0.108444    
+genotype228   1.33975    0.21401   6.260 6.85e-10 ***
+genotype229   1.33340    0.21415   6.226 8.41e-10 ***
+genotype230   0.28740    0.25204   1.140 0.254563    
+genotype232   1.34038    0.21400   6.264 6.72e-10 ***
+genotype233   1.14028    0.21886   5.210 2.51e-07 ***
+genotype236   1.04695    0.22144   4.728 2.76e-06 ***
+genotype237   1.32329    0.21438   6.173 1.16e-09 ***
+genotype242   1.24573    0.21619   5.762 1.26e-08 ***
+genotype245   1.11037    0.21966   5.055 5.56e-07 ***
+genotype248   0.76270    0.23070   3.306 0.000997 ***
+genotype249   0.36081    0.24819   1.454 0.146473    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for quasipoisson family taken to be 10.8557)
+
+    Null deviance: 61868.6  on 839  degrees of freedom
+Residual deviance:  7218.4  on 672  degrees of freedom
+AIC: NA
+
+Number of Fisher Scoring iterations: 11</code></pre>
+</div>
+</div>
+<p><strong>Variável AACPD desfolha</strong></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AUDPC defoliation</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>glm.Def <span class="ot">&lt;-</span> <span class="fu">glm</span>(defoliation <span class="sc">~</span> genotype,</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> AUDPC,</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">family =</span> <span class="fu">gaussian</span>())  <span class="co"># gaussian, poisson, quasipoisson)</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(glm.Def)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = defoliation ~ genotype, family = gaussian(), data = AUDPC)
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)   4265.0      744.1   5.732 1.50e-08 ***
+genotype2      932.5     1052.3   0.886 0.375873    
+genotype3      -65.0     1052.3  -0.062 0.950767    
+genotype4     1792.5     1052.3   1.703 0.088968 .  
+genotype5     2407.5     1052.3   2.288 0.022462 *  
+genotype6     2672.5     1052.3   2.540 0.011323 *  
+genotype7     2420.0     1052.3   2.300 0.021776 *  
+genotype8     4872.5     1052.3   4.630 4.39e-06 ***
+genotype9     2935.0     1052.3   2.789 0.005437 ** 
+genotype10   -2977.5     1052.3  -2.829 0.004803 ** 
+genotype11    -780.0     1052.3  -0.741 0.458831    
+genotype12     117.5     1052.3   0.112 0.911130    
+genotype13    4877.5     1052.3   4.635 4.29e-06 ***
+genotype14    4170.0     1052.3   3.963 8.21e-05 ***
+genotype15    4315.0     1052.3   4.100 4.63e-05 ***
+genotype16    2007.5     1052.3   1.908 0.056864 .  
+genotype17    -967.5     1052.3  -0.919 0.358231    
+genotype18   -1222.5     1052.3  -1.162 0.245775    
+genotype19    -462.5     1052.3  -0.439 0.660445    
+genotype20     257.5     1052.3   0.245 0.806771    
+genotype21    2987.5     1052.3   2.839 0.004664 ** 
+genotype22    1945.0     1052.3   1.848 0.065006 .  
+genotype23    3540.0     1052.3   3.364 0.000812 ***
+genotype24     695.0     1052.3   0.660 0.509206    
+genotype25     952.5     1052.3   0.905 0.365727    
+genotype26   -2832.5     1052.3  -2.692 0.007288 ** 
+genotype27    -445.0     1052.3  -0.423 0.672530    
+genotype28     487.5     1052.3   0.463 0.643335    
+genotype29     837.5     1052.3   0.796 0.426407    
+genotype30     195.0     1052.3   0.185 0.853050    
+genotype31    3450.0     1052.3   3.278 0.001098 ** 
+genotype32    1275.0     1052.3   1.212 0.226101    
+genotype33    1510.0     1052.3   1.435 0.151785    
+genotype34   -3017.5     1052.3  -2.867 0.004268 ** 
+genotype35    -780.0     1052.3  -0.741 0.458831    
+genotype36     885.0     1052.3   0.841 0.400660    
+genotype37     985.0     1052.3   0.936 0.349609    
+genotype38   -2837.5     1052.3  -2.696 0.007186 ** 
+genotype39     722.5     1052.3   0.687 0.492597    
+genotype40    2847.5     1052.3   2.706 0.006986 ** 
+genotype41    3040.0     1052.3   2.889 0.003992 ** 
+genotype42   -2172.5     1052.3  -2.064 0.039360 *  
+genotype43   -1672.5     1052.3  -1.589 0.112462    
+genotype44    -640.0     1052.3  -0.608 0.543284    
+genotype45    1930.0     1052.3   1.834 0.067097 .  
+genotype46   -3112.5     1052.3  -2.958 0.003209 ** 
+genotype47     177.5     1052.3   0.169 0.866107    
+genotype48    2985.0     1052.3   2.837 0.004698 ** 
+genotype49     355.0     1052.3   0.337 0.735965    
+genotype50   -1582.5     1052.3  -1.504 0.133108    
+genotype51    1732.5     1052.3   1.646 0.100166    
+genotype52    -682.5     1052.3  -0.649 0.516851    
+genotype53   -2537.5     1052.3  -2.411 0.016164 *  
+genotype54   -2430.0     1052.3  -2.309 0.021239 *  
+genotype55    2552.5     1052.3   2.426 0.015549 *  
+genotype56    -970.0     1052.3  -0.922 0.356991    
+genotype57     542.5     1052.3   0.516 0.606364    
+genotype58   -1587.5     1052.3  -1.509 0.131889    
+genotype59    1085.0     1052.3   1.031 0.302899    
+genotype60    -355.0     1052.3  -0.337 0.735965    
+genotype61    -527.5     1052.3  -0.501 0.616352    
+genotype62    1160.0     1052.3   1.102 0.270727    
+genotype63   -1262.5     1052.3  -1.200 0.230680    
+genotype64    3132.5     1052.3   2.977 0.003019 ** 
+genotype65    1890.0     1052.3   1.796 0.072946 .  
+genotype66    1300.0     1052.3   1.235 0.217139    
+genotype67   -1800.0     1052.3  -1.710 0.087642 .  
+genotype68    1287.5     1052.3   1.223 0.221587    
+genotype69     605.0     1052.3   0.575 0.565548    
+genotype70    -370.0     1052.3  -0.352 0.725253    
+genotype71    -800.0     1052.3  -0.760 0.447399    
+genotype72    3722.5     1052.3   3.537 0.000432 ***
+genotype73    5727.5     1052.3   5.443 7.37e-08 ***
+genotype74   -1347.5     1052.3  -1.280 0.200822    
+genotype75    2697.5     1052.3   2.563 0.010584 *  
+genotype76     667.5     1052.3   0.634 0.526104    
+genotype77   -1000.0     1052.3  -0.950 0.342324    
+genotype78    -450.0     1052.3  -0.428 0.669068    
+genotype79    -502.5     1052.3  -0.478 0.633159    
+genotype80     810.0     1052.3   0.770 0.441744    
+genotype81    2740.0     1052.3   2.604 0.009426 ** 
+genotype82    1047.5     1052.3   0.995 0.319904    
+genotype83    2425.0     1052.3   2.304 0.021506 *  
+genotype84    2602.5     1052.3   2.473 0.013643 *  
+genotype98     765.0     1052.3   0.727 0.467512    
+genotype100   2180.0     1052.3   2.072 0.038688 *  
+genotype101   1087.5     1052.3   1.033 0.301787    
+genotype103   3237.5     1052.3   3.076 0.002180 ** 
+genotype104  -1460.0     1052.3  -1.387 0.165788    
+genotype105   1937.5     1052.3   1.841 0.066045 .  
+genotype108    735.0     1052.3   0.698 0.485145    
+genotype110  -1890.0     1052.3  -1.796 0.072946 .  
+genotype112  -1335.0     1052.3  -1.269 0.205026    
+genotype113  -3340.0     1052.3  -3.174 0.001573 ** 
+genotype114   1852.5     1052.3   1.760 0.078804 .  
+genotype117     87.5     1052.3   0.083 0.933759    
+genotype119    350.0     1052.3   0.333 0.739548    
+genotype120   2107.5     1052.3   2.003 0.045615 *  
+genotype122    380.0     1052.3   0.361 0.718140    
+genotype123     -2.5     1052.3  -0.002 0.998105    
+genotype124   -725.0     1052.3  -0.689 0.491102    
+genotype126   1585.0     1052.3   1.506 0.132497    
+genotype130    327.5     1052.3   0.311 0.755738    
+genotype131   4210.0     1052.3   4.001 7.02e-05 ***
+genotype133   2582.5     1052.3   2.454 0.014379 *  
+genotype134    382.5     1052.3   0.363 0.716366    
+genotype135    277.5     1052.3   0.264 0.792095    
+genotype136   1332.5     1052.3   1.266 0.205875    
+genotype137   4260.0     1052.3   4.048 5.76e-05 ***
+genotype138   2312.5     1052.3   2.197 0.028328 *  
+genotype139   -350.0     1052.3  -0.333 0.739548    
+genotype140   1487.5     1052.3   1.414 0.157970    
+genotype141   1247.5     1052.3   1.185 0.236261    
+genotype142   1570.0     1052.3   1.492 0.136194    
+genotype143    -32.5     1052.3  -0.031 0.975372    
+genotype144   -215.0     1052.3  -0.204 0.838177    
+genotype145   3610.0     1052.3   3.430 0.000640 ***
+genotype146    275.0     1052.3   0.261 0.793926    
+genotype147   2480.0     1052.3   2.357 0.018727 *  
+genotype149    177.5     1052.3   0.169 0.866107    
+genotype150   2190.0     1052.3   2.081 0.037807 *  
+genotype152    492.5     1052.3   0.468 0.639936    
+genotype153   2757.5     1052.3   2.620 0.008983 ** 
+genotype154    290.0     1052.3   0.276 0.782960    
+genotype155   2752.5     1052.3   2.616 0.009108 ** 
+genotype156  -1310.0     1052.3  -1.245 0.213626    
+genotype157   3380.0     1052.3   3.212 0.001382 ** 
+genotype158  -1135.0     1052.3  -1.079 0.281180    
+genotype159   -105.0     1052.3  -0.100 0.920551    
+genotype160   1540.0     1052.3   1.463 0.143827    
+genotype161   -205.0     1052.3  -0.195 0.845607    
+genotype162   -357.5     1052.3  -0.340 0.734176    
+genotype163    -95.0     1052.3  -0.090 0.928096    
+genotype164   4612.5     1052.3   4.383 1.36e-05 ***
+genotype165    737.5     1052.3   0.701 0.483662    
+genotype166   -797.5     1052.3  -0.758 0.448819    
+genotype167   3210.0     1052.3   3.050 0.002376 ** 
+genotype168   3472.5     1052.3   3.300 0.001019 ** 
+genotype169   3102.5     1052.3   2.948 0.003308 ** 
+genotype171    962.5     1052.3   0.915 0.360719    
+genotype172   -345.0     1052.3  -0.328 0.743136    
+genotype173  -1085.0     1052.3  -1.031 0.302899    
+genotype174   1322.5     1052.3   1.257 0.209294    
+genotype183   -875.0     1052.3  -0.831 0.406001    
+genotype199   -392.5     1052.3  -0.373 0.709284    
+genotype200    665.0     1052.3   0.632 0.527654    
+genotype203  -2605.0     1052.3  -2.475 0.013554 *  
+genotype205  -1552.5     1052.3  -1.475 0.140608    
+genotype212   1755.0     1052.3   1.668 0.095841 .  
+genotype213   2562.5     1052.3   2.435 0.015150 *  
+genotype214   1855.0     1052.3   1.763 0.078402 .  
+genotype216   2540.0     1052.3   2.414 0.016060 *  
+genotype218   -547.5     1052.3  -0.520 0.603050    
+genotype219   2525.0     1052.3   2.399 0.016693 *  
+genotype220   4032.5     1052.3   3.832 0.000139 ***
+genotype222   2617.5     1052.3   2.487 0.013113 *  
+genotype226    510.0     1052.3   0.485 0.628096    
+genotype228   2045.0     1052.3   1.943 0.052400 .  
+genotype229   3557.5     1052.3   3.381 0.000765 ***
+genotype230  -1892.5     1052.3  -1.798 0.072569 .  
+genotype232   1092.5     1052.3   1.038 0.299572    
+genotype233   1210.0     1052.3   1.150 0.250631    
+genotype236     17.5     1052.3   0.017 0.986737    
+genotype237   3697.5     1052.3   3.514 0.000472 ***
+genotype242   3855.0     1052.3   3.663 0.000269 ***
+genotype245    -90.0     1052.3  -0.086 0.931871    
+genotype248    902.5     1052.3   0.858 0.391416    
+genotype249    125.0     1052.3   0.119 0.905484    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for gaussian family taken to be 2768593)
+
+    Null deviance: 4810089040  on 839  degrees of freedom
+Residual deviance: 1860494563  on 672  degrees of freedom
+AIC: 14995
+
+Number of Fisher Scoring iterations: 2</code></pre>
+</div>
+</div>
+</section>
+<section id="comparação-de-médias-scott-knott" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="comparação-de-médias-scott-knott"><span class="header-section-number">6</span> Comparação de médias (Scott-Knott)</h2>
+<p>A comparação de médias pelo método de Scott-Knott é uma técnica estatística para agrupar médias de tratamentos ou grupos que não diferem significativamente entre si. Este método divide as médias em grupos homogêneos, maximizando as diferenças entre os grupos e minimizando as diferenças dentro de cada grupo. Para realizar análises de agrupamento de médias, foi utilizado o pacote <code>ScottKnott</code> e a função <code>SK()</code>.</p>
+<p><strong>Variável AACPD incidência:</strong> Convertimos <code>genotype</code> em fator usando <code>as.factor</code> na coluna <code>genotype</code> do dataframe <code>AUDPC</code> (AUDPC$genotype). Em seguida, com a função <code>with()</code>, avaliamos expressões dentro do ambiente do dataframe <code>AUDPC</code>. Utilizamos a função <code>SK()</code> para realizar um teste de comparação múltipla (Scott-Knott) para as variáveis <code>incidence</code>, <code>severidade</code> e <code>defoliation</code>, em função do fator <code>genotype</code>, com um nível de significância de <strong>p &lt; 0.05</strong>.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Carregar bilioteca</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ScottKnott)</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Convertir genótipo em fator</span></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>AUDPC<span class="sc">$</span>genotype <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(<span class="fu">as.character</span>(AUDPC<span class="sc">$</span>genotype))</span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(AUDPC<span class="sc">$</span>genotype)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "factor"</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(AUDPC<span class="sc">$</span>genotype)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  1  10 100 101 103 104 105 108  11 110 112 113 114 117 119  12 120 122 123 124 
+  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5 
+126  13 130 131 133 134 135 136 137 138 139  14 140 141 142 143 144 145 146 147 
+  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5 
+149  15 150 152 153 154 155 156 157 158 159  16 160 161 162 163 164 165 166 167 
+  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5 
+168 169  17 171 172 173 174  18 183  19 199   2  20 200 203 205  21 212 213 214 
+  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5 
+216 218 219  22 220 222 226 228 229  23 230 232 233 236 237  24 242 245 248 249 
+  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5 
+ 25  26  27  28  29   3  30  31  32  33  34  35  36  37  38  39   4  40  41  42 
+  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5 
+ 43  44  45  46  47  48  49   5  50  51  52  53  54  55  56  57  58  59   6  60 
+  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5 
+ 61  62  63  64  65  66  67  68  69   7  70  71  72  73  74  75  76  77  78  79 
+  5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5   5 
+  8  80  81  82  83  84   9  98 
+  5   5   5   5   5   5   5   5 </code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>SK1 <span class="ot">&lt;-</span> <span class="fu">with</span>(AUDPC, </span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>            <span class="fu">SK</span>(incidence <span class="sc">~</span> genotype, </span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">sig.level =</span> <span class="fl">0.05</span>, </span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">which =</span> <span class="st">"genotype"</span>))</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>SK1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Results
+       Means G1 G2 G3 G4
+157 11166.21  a         
+153 10464.53  a         
+73  10271.43  a         
+237 10254.29  a         
+169  9997.13  a         
+164  9958.57  a         
+150  9812.90  a         
+147  9784.80  a         
+31   9725.95  a         
+145  9555.38  a         
+15   9503.83  a         
+155  9490.63  a         
+23   9480.60  a         
+154  9350.00  a         
+101  9274.17  a         
+131  9273.97  a         
+84   9250.69  a         
+214  9149.29  a         
+48   9117.86  a         
+167  9117.32  a         
+242  9088.81  a         
+22   9088.10  a         
+114  9029.70  a         
+45   9024.17  a         
+137  8948.91  a         
+9    8946.03  a         
+81   8934.84  a         
+213  8912.14  a         
+14   8814.76  a         
+75   8774.86  a         
+133  8760.48  a         
+229  8713.26  a         
+168  8658.57  a         
+32   8655.83  a         
+100  8633.85  a         
+72   8550.12  a         
+83   8532.96  a         
+108  8474.92  a         
+5    8429.17  a         
+141  8417.98  a         
+232  8396.11  a         
+219  8362.30  a         
+21   8356.63  a         
+146  8349.84  a         
+228  8328.79  a         
+220  8290.07  a         
+66   8273.06  a         
+4    8208.97  a         
+98   8197.62  a         
+68   8105.16  a         
+8    7978.10  a         
+200  7971.31  a         
+216  7925.00     b      
+55   7882.90     b      
+61   7779.19     b      
+36   7755.80     b      
+103  7754.25     b      
+139  7687.14     b      
+126  7679.15     b      
+140  7638.86     b      
+138  7625.97     b      
+136  7622.02     b      
+152  7607.34     b      
+13   7602.94     b      
+171  7578.91     b      
+60   7575.40     b      
+233  7367.78     b      
+105  7342.04     b      
+143  7316.83     b      
+19   7287.50     b      
+160  7166.75     b      
+245  7107.22     b      
+6    7078.75     b      
+18   7035.63     b      
+17   6984.48     b      
+2    6903.10     b      
+44   6902.40     b      
+12   6882.19     b      
+25   6881.49     b      
+80   6843.61     b      
+76   6823.65     b      
+236  6782.34     b      
+3    6768.04     b      
+40   6751.69     b      
+41   6695.04     b      
+64   6681.03     b      
+142  6633.81     b      
+30   6550.04     b      
+172  6458.92     b      
+119  6454.89     b      
+49   6370.22     b      
+82   6338.37     b      
+33   6334.84     b      
+212  6328.73     b      
+161  6196.94     b      
+248  5888.77     b      
+158  5643.25     b      
+156  5551.79     b      
+24   5499.05     b      
+77   5421.33     b      
+144  5387.30     b      
+56   5326.79     b      
+159  5032.83        c   
+249  4934.38        c   
+51   4901.79        c   
+59   4633.85        c   
+199  4552.84        c   
+222  4543.33        c   
+120  4522.18        c   
+218  4414.86        c   
+163  4409.92        c   
+35   4406.15        c   
+11   4406.15        c   
+67   4263.27        c   
+165  4226.35        c   
+205  4223.51        c   
+226  3939.46        c   
+124  3758.35        c   
+71   3672.04        c   
+123  3650.89        c   
+113  3512.12        c   
+230  3386.81        c   
+29   3326.40        c   
+50   3247.20        c   
+47   3163.87        c   
+79   3128.29        c   
+162  3045.04        c   
+37   3016.87        c   
+1    2928.91        c   
+173  2883.15        c   
+174  2851.27        c   
+58   2785.38        c   
+78   2562.94           d
+112  2534.84           d
+166  2531.63           d
+57   2515.28           d
+42   2463.63           d
+104  2417.48           d
+28   2379.90           d
+149  2366.27           d
+135  2325.46           d
+69   2226.51           d
+43   2031.79           d
+183  1985.71           d
+7    1923.89           d
+10   1859.35           d
+27   1832.68           d
+52   1798.27           d
+16   1621.67           d
+134  1561.81           d
+130  1546.73           d
+39   1489.17           d
+62   1475.00           d
+65   1468.10           d
+63   1422.88           d
+74   1321.75           d
+54   1266.25           d
+122  1190.95           d
+34   1018.67           d
+26    966.03           d
+38    950.69           d
+70    943.65           d
+20    896.61           d
+117   720.00           d
+46    626.23           d
+203   504.76           d
+110   453.10           d
+53    395.00           d
+
+Sig.level
+ 0.05
+
+Statistics
+       lambda chisq dfchisq  pvalue evmean dferror
+Clus 1    765   176     147 3.3e-84 449436     672
+Clus 2    263   112      89 4.7e-19 449436     672
+Clus 3     49    62      46 3.4e-01 449436     672
+Clus 4     52    60      44 2.0e-01 449436     672
+Clus 5    204    77      58 3.8e-18 449436     672
+Clus 6     37    39      26 8.2e-02 449436     672
+Clus 7     36    46      32 2.8e-01 449436     672
+
+
+Clusters
+#################  Cluster  1  ################
+{G1}: 157 153 73 237 169 164 150 147 31 145 15 155 23 154 101 131 84 214 48 167 242 22 114 45 137 9 81 213 14 75 133 229 168 32 100 72 83 108 5 141 232 219 21 146 228 220 66 4 98 68 8 200 216 55 61 36 103 139 126 140 138 136 152 13 171 60 233 105 143 19 160 245 6 18 17 2 44 12 25 80 76 236 3 40 41 64 142 30 172 119 49 82 33 212 161 248 158 156 24 77 144 56
+{G2}: 159 249 51 59 199 222 120 218 163 35 11 67 165 205 226 124 71 123 113 230 29 50 47 79 162 37 1 173 174 58 78 112 166 57 42 104 28 149 135 69 43 183 7 10 27 52 16 134 130 39 62 65 63 74 54 122 34 26 38 70 20 117 46 203 110 53
+#################  Cluster  2  ################
+{G1}: 157 153 73 237 169 164 150 147 31 145 15 155 23 154 101 131 84 214 48 167 242 22 114 45 137 9 81 213 14 75 133 229 168 32 100 72 83 108 5 141 232 219 21 146 228 220 66 4 98 68 8 200
+{G2}: 216 55 61 36 103 139 126 140 138 136 152 13 171 60 233 105 143 19 160 245 6 18 17 2 44 12 25 80 76 236 3 40 41 64 142 30 172 119 49 82 33 212 161 248 158 156 24 77 144 56
+#################  Cluster  3  ################
+{G1}: 157 153 73 237 169 164 150 147 31 145 15 155 23 154 101 131 84
+{G2}: 214 48 167 242 22 114 45 137 9 81 213 14 75 133 229 168 32 100 72 83 108 5 141 232 219 21 146 228 220 66 4 98 68 8 200
+#################  Cluster  4  ################
+{G1}: 216 55 61 36 103 139 126 140 138 136 152 13 171 60 233 105 143 19 160 245 6 18 17 2 44 12 25 80 76 236 3 40 41 64
+{G2}: 142 30 172 119 49 82 33 212 161 248 158 156 24 77 144 56
+#################  Cluster  5  ################
+{G1}: 159 249 51 59 199 222 120 218 163 35 11 67 165 205 226 124 71 123 113 230 29 50 47 79 162 37 1 173 174 58
+{G2}: 78 112 166 57 42 104 28 149 135 69 43 183 7 10 27 52 16 134 130 39 62 65 63 74 54 122 34 26 38 70 20 117 46 203 110 53
+#################  Cluster  6  ################
+{G1}: 159 249 51 59 199 222 120 218 163 35 11 67 165 205 226
+{G2}: 124 71 123 113 230 29 50 47 79 162 37 1 173 174 58
+#################  Cluster  7  ################
+{G1}: 78 112 166 57 42 104 28 149 135 69 43 183 7 10 27 52
+{G2}: 16 134 130 39 62 65 63 74 54 122 34 26 38 70 20 117 46 203 110 53</code></pre>
+</div>
+</div>
+<p><strong>Variável AACPD severidade:</strong></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>SK2 <span class="ot">&lt;-</span> <span class="fu">with</span>(AUDPC, </span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>            <span class="fu">SK</span>(severity <span class="sc">~</span> genotype, </span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">sig.level =</span> <span class="fl">0.05</span>, </span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">which =</span> <span class="st">"genotype"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in qt(sig.level, aux_mt$coef[, 3]): NaNs produced
+Warning in qt(sig.level, aux_mt$coef[, 3]): NaNs produced
+Warning in qt(sig.level, aux_mt$coef[, 3]): NaNs produced
+Warning in qt(sig.level, aux_mt$coef[, 3]): NaNs produced</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>SK2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Results
+     Means G1 G2 G3 G4 G5 G6 G7
+153 282.18  a                  
+150 268.93  a                  
+157 267.35  a                  
+147 265.21  a                  
+73  260.05  a                  
+169 260.03  a                  
+75  257.16  a                  
+84  243.62  a                  
+48  239.09     b               
+15  235.86     b               
+164 235.53     b               
+145 233.95     b               
+114 233.91     b               
+155 229.99     b               
+232 228.54     b               
+228 228.40     b               
+229 226.95     b               
+167 226.61     b               
+237 224.67     b               
+219 223.96     b               
+137 221.56     b               
+133 220.02     b               
+81  220.02     b               
+23  218.47     b               
+68  218.20     b               
+66  217.95     b               
+36  217.06     b               
+22  216.66     b               
+168 214.72     b               
+214 214.46     b               
+152 214.41     b               
+72  214.30     b               
+101 211.97     b               
+31  209.86     b               
+131 209.03     b               
+242 207.90     b               
+141 202.87     b               
+140 202.58     b               
+139 201.00     b               
+55  200.85     b               
+21  200.64     b               
+213 199.66     b               
+220 198.24     b               
+14  190.13        c            
+146 189.46        c            
+45  187.99        c            
+216 187.79        c            
+98  187.79        c            
+17  187.76        c            
+233 187.10        c            
+83  185.58        c            
+5   185.01        c            
+100 184.74        c            
+200 184.71        c            
+60  183.82        c            
+154 183.60        c            
+61  183.08        c            
+245 181.58        c            
+9   180.53        c            
+103 180.29        c            
+8   179.19        c            
+76  178.89        c            
+32  178.37        c            
+143 177.57        c            
+19  176.66        c            
+236 170.42        c            
+138 170.16        c            
+108 163.65        c            
+4   160.87           d         
+119 160.60           d         
+136 160.20           d         
+6   157.87           d         
+25  157.66           d         
+44  157.02           d         
+13  156.25           d         
+30  155.17           d         
+12  154.76           d         
+126 154.38           d         
+80  153.49           d         
+171 152.37           d         
+33  152.14           d         
+18  151.83           d         
+77  150.76           d         
+172 144.89           d         
+2   144.55           d         
+64  140.88           d         
+105 137.49           d         
+142 135.90           d         
+41  135.74           d         
+3   133.79           d         
+161 131.84           d         
+51  131.51           d         
+40  130.87           d         
+248 128.26           d         
+49  124.66           d         
+160 123.24           d         
+82  120.30           d         
+59  119.66           d         
+205 111.96              e      
+158 111.46              e      
+159 106.79              e      
+212 101.76              e      
+144  97.89              e      
+226  88.89              e      
+156  86.44              e      
+249  85.81              e      
+199  84.05              e      
+163  82.93              e      
+71   81.93              e      
+230  79.74              e      
+120  74.04                 f   
+24   73.16                 f   
+218  68.23                 f   
+29   67.97                 f   
+113  64.18                 f   
+67   64.05                 f   
+1    59.82                 f   
+165  59.14                 f   
+222  57.90                 f   
+56   57.68                 f   
+79   55.72                 f   
+124  52.07                 f   
+50   51.93                 f   
+112  50.83                 f   
+58   50.49                 f   
+123  49.74                 f   
+42   49.04                 f   
+162  45.47                 f   
+11   43.95                 f   
+35   43.95                 f   
+173  42.60                 f   
+166  40.04                    g
+37   39.51                    g
+78   34.45                    g
+183  29.84                    g
+57   26.22                    g
+10   24.69                    g
+43   24.46                    g
+149  22.39                    g
+135  22.01                    g
+47   21.64                    g
+34   19.25                    g
+104  19.23                    g
+54   17.83                    g
+69   16.93                    g
+174  16.73                    g
+39   15.70                    g
+28   15.48                    g
+74   15.15                    g
+38   14.35                    g
+122  12.81                    g
+7    11.83                    g
+63   11.02                    g
+52   10.71                    g
+27   10.26                    g
+130   9.01                    g
+134   8.20                    g
+26    6.15                    g
+65    5.78                    g
+46    4.13                    g
+110   3.53                    g
+16    2.82                    g
+20    2.19                    g
+203   1.26                    g
+70    1.14                    g
+53    0.90                    g
+62    0.15                    g
+117   0.00                    g
+
+Sig.level
+ 0.05
+
+Statistics
+        lambda chisq dfchisq  pvalue evmean dferror
+Clus 1   790.4   176     147 1.2e-88    301     672
+Clus 2   309.6   108      86 4.8e-27    301     672
+Clus 3    59.6    53      38 1.3e-02    301     672
+Clus 4     2.3    14       7 9.4e-01    301     672
+Clus 5    14.7    45      31 9.9e-01    301     672
+Clus 6    85.9    65      48 6.8e-04    301     672
+Clus 7     3.1    34      22 1.0e+00    301     672
+Clus 8    19.9    39      26 8.1e-01    301     672
+Clus 9   198.6    81      61 2.2e-16    301     672
+Clus 10   47.0    42      29 1.8e-02    301     672
+Clus 11    6.4    19      11 8.2e-01    301     672
+Clus 12    6.2    29      18 1.0e+00    301     672
+Clus 13   13.1    47      32 1.0e+00    301     672
+
+
+Clusters
+#################  Cluster  1  ################
+{G1}: 153 150 157 147 73 169 75 84 48 15 164 145 114 155 232 228 229 167 237 219 137 133 81 23 68 66 36 22 168 214 152 72 101 31 131 242 141 140 139 55 21 213 220 14 146 45 216 98 17 233 83 5 100 200 60 154 61 245 9 103 8 76 32 143 19 236 138 108 4 119 136 6 25 44 13 30 12 126 80 171 33 18 77 172 2 64 105 142 41 3 161 51 40 248 49 160 82 59
+{G2}: 205 158 159 212 144 226 156 249 199 163 71 230 120 24 218 29 113 67 1 165 222 56 79 124 50 112 58 123 42 162 11 35 173 166 37 78 183 57 10 43 149 135 47 34 104 54 69 174 39 28 74 38 122 7 63 52 27 130 134 26 65 46 110 16 20 203 70 53 62 117
+#################  Cluster  2  ################
+{G1}: 153 150 157 147 73 169 75 84 48 15 164 145 114 155 232 228 229 167 237 219 137 133 81 23 68 66 36 22 168 214 152 72 101 31 131 242 141 140 139 55 21 213 220
+{G2}: 14 146 45 216 98 17 233 83 5 100 200 60 154 61 245 9 103 8 76 32 143 19 236 138 108 4 119 136 6 25 44 13 30 12 126 80 171 33 18 77 172 2 64 105 142 41 3 161 51 40 248 49 160 82 59
+#################  Cluster  3  ################
+{G1}: 153 150 157 147 73 169 75 84
+{G2}: 48 15 164 145 114 155 232 228 229 167 237 219 137 133 81 23 68 66 36 22 168 214 152 72 101 31 131 242 141 140 139 55 21 213 220
+#################  Cluster  4  ################
+{G1}: 153 150 157 147
+{G2}: 73 169 75 84
+#################  Cluster  5  ################
+{G1}: 48 15 164 145 114 155 232 228 229 167 237 219 137 133 81
+{G2}: 23 68 66 36 22 168 214 152 72 101 31 131 242 141 140 139 55 21 213 220
+#################  Cluster  6  ################
+{G1}: 14 146 45 216 98 17 233 83 5 100 200 60 154 61 245 9 103 8 76 32 143 19 236 138 108
+{G2}: 4 119 136 6 25 44 13 30 12 126 80 171 33 18 77 172 2 64 105 142 41 3 161 51 40 248 49 160 82 59
+#################  Cluster  7  ################
+{G1}: 14 146 45 216 98 17 233 83 5 100 200 60 154 61 245 9 103
+{G2}: 8 76 32 143 19 236 138 108
+#################  Cluster  8  ################
+{G1}: 4 119 136 6 25 44 13 30 12 126 80 171 33 18 77 172 2
+{G2}: 64 105 142 41 3 161 51 40 248 49 160 82 59
+#################  Cluster  9  ################
+{G1}: 205 158 159 212 144 226 156 249 199 163 71 230 120 24 218 29 113 67 1 165 222 56 79 124 50 112 58 123 42 162 11 35 173
+{G2}: 166 37 78 183 57 10 43 149 135 47 34 104 54 69 174 39 28 74 38 122 7 63 52 27 130 134 26 65 46 110 16 20 203 70 53 62 117
+#################  Cluster  10  ################
+{G1}: 205 158 159 212 144 226 156 249 199 163 71 230
+{G2}: 120 24 218 29 113 67 1 165 222 56 79 124 50 112 58 123 42 162 11 35 173
+#################  Cluster  11  ################
+{G1}: 205 158 159 212 144
+{G2}: 226 156 249 199 163 71 230
+#################  Cluster  12  ################
+{G1}: 120 24 218 29 113 67 1 165 222 56
+{G2}: 79 124 50 112 58 123 42 162 11 35 173
+#################  Cluster  13  ################
+{G1}: 166 37 78 183 57 10 43 149 135 47 34 104 54 69 174
+{G2}: 39 28 74 38 122 7 63 52 27 130 134 26 65 46 110 16 20 203 70 53 62 117</code></pre>
+</div>
+</div>
+<p><strong>Variável AACPD desfolha:</strong></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>SK3 <span class="ot">&lt;-</span> <span class="fu">with</span>(AUDPC, </span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>            <span class="fu">SK</span>(defoliation <span class="sc">~</span> genotype, </span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">sig.level =</span> <span class="fl">0.05</span>, </span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">which =</span> <span class="st">"genotype"</span>))</span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a>SK3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Results
+      Means G1 G2 G3 G4
+73  9992.50  a         
+13  9142.50  a         
+8   9137.50  a         
+164 8877.50  a         
+15  8580.00  a         
+137 8525.00  a         
+131 8475.00  a         
+14  8435.00  a         
+220 8297.50  a         
+242 8120.00  a         
+72  7987.50  a         
+237 7962.50  a         
+145 7875.00  a         
+229 7822.50  a         
+23  7805.00  a         
+168 7737.50  a         
+31  7715.00  a         
+157 7645.00  a         
+103 7502.50  a         
+167 7475.00  a         
+64  7397.50  a         
+169 7367.50  a         
+41  7305.00  a         
+21  7252.50  a         
+48  7250.00  a         
+9   7200.00  a         
+40  7112.50     b      
+153 7022.50     b      
+155 7017.50     b      
+81  7005.00     b      
+75  6962.50     b      
+6   6937.50     b      
+222 6882.50     b      
+84  6867.50     b      
+133 6847.50     b      
+213 6827.50     b      
+55  6817.50     b      
+216 6805.00     b      
+219 6790.00     b      
+147 6745.00     b      
+83  6690.00     b      
+7   6685.00     b      
+5   6672.50     b      
+138 6577.50     b      
+150 6455.00     b      
+100 6445.00     b      
+120 6372.50     b      
+228 6310.00     b      
+16  6272.50     b      
+22  6210.00     b      
+105 6202.50     b      
+45  6195.00     b      
+65  6155.00     b      
+214 6120.00     b      
+114 6117.50     b      
+4   6057.50     b      
+212 6020.00     b      
+51  5997.50     b      
+126 5850.00     b      
+142 5835.00     b      
+160 5805.00     b      
+33  5775.00     b      
+140 5752.50     b      
+136 5597.50     b      
+174 5587.50     b      
+66  5565.00     b      
+68  5552.50     b      
+32  5540.00     b      
+141 5512.50     b      
+233 5475.00     b      
+62  5425.00     b      
+232 5357.50        c   
+101 5352.50        c   
+59  5350.00        c   
+82  5312.50        c   
+37  5250.00        c   
+171 5227.50        c   
+25  5217.50        c   
+2   5197.50        c   
+248 5167.50        c   
+36  5150.00        c   
+29  5102.50        c   
+80  5075.00        c   
+98  5030.00        c   
+165 5002.50        c   
+108 5000.00        c   
+39  4987.50        c   
+24  4960.00        c   
+76  4932.50        c   
+200 4930.00        c   
+69  4870.00        c   
+57  4807.50        c   
+226 4775.00        c   
+152 4757.50        c   
+28  4752.50        c   
+134 4647.50        c   
+122 4645.00        c   
+49  4620.00        c   
+119 4615.00        c   
+130 4592.50        c   
+154 4555.00        c   
+135 4542.50        c   
+146 4540.00        c   
+20  4522.50        c   
+30  4460.00        c   
+149 4442.50        c   
+47  4442.50        c   
+249 4390.00        c   
+12  4382.50        c   
+117 4352.50        c   
+236 4282.50        c   
+1   4265.00        c   
+123 4262.50        c   
+143 4232.50        c   
+3   4200.00        c   
+245 4175.00        c   
+163 4170.00        c   
+159 4160.00        c   
+161 4060.00        c   
+144 4050.00        c   
+172 3920.00        c   
+139 3915.00        c   
+60  3910.00        c   
+162 3907.50        c   
+70  3895.00        c   
+199 3872.50        c   
+27  3820.00        c   
+78  3815.00        c   
+19  3802.50        c   
+79  3762.50        c   
+61  3737.50        c   
+218 3717.50        c   
+44  3625.00        c   
+52  3582.50        c   
+124 3540.00        c   
+11  3485.00        c   
+35  3485.00        c   
+166 3467.50        c   
+71  3465.00        c   
+183 3390.00           d
+17  3297.50           d
+56  3295.00           d
+77  3265.00           d
+173 3180.00           d
+158 3130.00           d
+18  3042.50           d
+63  3002.50           d
+156 2955.00           d
+112 2930.00           d
+74  2917.50           d
+104 2805.00           d
+205 2712.50           d
+50  2682.50           d
+58  2677.50           d
+43  2592.50           d
+67  2465.00           d
+110 2375.00           d
+230 2372.50           d
+42  2092.50           d
+54  1835.00           d
+53  1727.50           d
+203 1660.00           d
+26  1432.50           d
+38  1427.50           d
+10  1287.50           d
+34  1247.50           d
+46  1152.50           d
+113  925.00           d
+
+Sig.level
+ 0.05
+
+Statistics
+       lambda chisq dfchisq  pvalue evmean dferror
+Clus 1    474   176     147 5.5e-36 553719     672
+Clus 2    114    82      62 7.5e-05 553719     672
+Clus 3     22    35      23 5.2e-01 553719     672
+Clus 4     24    55      39 9.7e-01 553719     672
+Clus 5    180   107      85 9.5e-09 553719     672
+Clus 6     41    79      60 9.7e-01 553719     672
+Clus 7     33    38      25 1.5e-01 553719     672
+
+
+Clusters
+#################  Cluster  1  ################
+{G1}: 73 13 8 164 15 137 131 14 220 242 72 237 145 229 23 168 31 157 103 167 64 169 41 21 48 9 40 153 155 81 75 6 222 84 133 213 55 216 219 147 83 7 5 138 150 100 120 228 16 22 105 45 65 214 114 4 212 51 126 142 160 33 140 136 174 66 68 32 141 233 62
+{G2}: 232 101 59 82 37 171 25 2 248 36 29 80 98 165 108 39 24 76 200 69 57 226 152 28 134 122 49 119 130 154 135 146 20 30 149 47 249 12 117 236 1 123 143 3 245 163 159 161 144 172 139 60 162 70 199 27 78 19 79 61 218 44 52 124 11 35 166 71 183 17 56 77 173 158 18 63 156 112 74 104 205 50 58 43 67 110 230 42 54 53 203 26 38 10 34 46 113
+#################  Cluster  2  ################
+{G1}: 73 13 8 164 15 137 131 14 220 242 72 237 145 229 23 168 31 157 103 167 64 169 41 21 48 9
+{G2}: 40 153 155 81 75 6 222 84 133 213 55 216 219 147 83 7 5 138 150 100 120 228 16 22 105 45 65 214 114 4 212 51 126 142 160 33 140 136 174 66 68 32 141 233 62
+#################  Cluster  3  ################
+{G1}: 73 13 8 164 15 137 131 14 220
+{G2}: 242 72 237 145 229 23 168 31 157 103 167 64 169 41 21 48 9
+#################  Cluster  4  ################
+{G1}: 40 153 155 81 75 6 222 84 133 213 55 216 219 147 83 7 5 138 150 100 120
+{G2}: 228 16 22 105 45 65 214 114 4 212 51 126 142 160 33 140 136 174 66 68 32 141 233 62
+#################  Cluster  5  ################
+{G1}: 232 101 59 82 37 171 25 2 248 36 29 80 98 165 108 39 24 76 200 69 57 226 152 28 134 122 49 119 130 154 135 146 20 30 149 47 249 12 117 236 1 123 143 3 245 163 159 161 144 172 139 60 162 70 199 27 78 19 79 61 218 44 52 124 11 35 166 71
+{G2}: 183 17 56 77 173 158 18 63 156 112 74 104 205 50 58 43 67 110 230 42 54 53 203 26 38 10 34 46 113
+#################  Cluster  6  ################
+{G1}: 232 101 59 82 37 171 25 2 248 36 29 80 98 165 108 39 24 76 200 69 57 226 152 28 134 122 49 119 130 154 135 146 20 30 149 47
+{G2}: 249 12 117 236 1 123 143 3 245 163 159 161 144 172 139 60 162 70 199 27 78 19 79 61 218 44 52 124 11 35 166 71
+#################  Cluster  7  ################
+{G1}: 183 17 56 77 173 158 18 63 156 112 74 104 205 50 58 43 67 110 230
+{G2}: 42 54 53 203 26 38 10 34 46 113</code></pre>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

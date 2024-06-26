@@ -1,0 +1,325 @@
+---
+title: "Análise Multivariada"
+author: "Amanda Pereira Honório & Richard Pardes-Espinosa"
+date: "2024-06-26"
+format: html
+toc: true
+number-sections: true
+code-fold: show
+---
+
+## Preparar dados
+
+Para realizar as análises, houve o carregamento dos pacotes abaixo:
+
+```{r}
+# Carregar bibliotecas
+library(readxl)
+library(dplyr)
+library(tidyverse)
+```
+
+### Importação dos dados
+
+Como o DataFrame contendo os dados da área abaixo da curva de progresso da doença da ferrugem do cafeeiro está localizado em uma planilha do Excel, utilizou-se a função `read_csv` do pacote `readr` para realizar a importação dos dados. O DataFrame foi então atribuído ao objeto denominado `dato`.
+
+```{r}
+# Chamar dataframe
+dato <- read_csv("ferrugem_AUDPC.csv")
+dato <- dato[,c(-2)]
+dato
+```
+
+Note que eliminamos a segunda coluna do *dataframe* utilizando a notação `dato[, c(-2)]`, que seleciona todas as linhas e todas as colunas, exceto a segunda. O operador `-` indica a exclusão dessa coluna.
+
+Em seguida, foi criado um novo *dataframe* para calcular as médias por tratamento utilizando a função `mean`. Além disso, renomeamos as variáveis para facilitar seu manejo.
+
+```{r}
+# Calcular as médias por tratamento
+dato1 <- dato |> 
+  group_by(genotype) |> 
+  summarise(
+    mean_incidence = mean(incidence, na.rm = TRUE),
+    mean_severity = mean(severity, na.rm = TRUE),
+    mean_defoliation = mean(defoliation, na.rm = TRUE)
+  )
+dato1
+```
+
+
+## Análisis de Componentes Principales (PCA)
+
+A análise de componentes principais (PCA) nos permite resumir e visualizar a informação em um conjunto de dados que inclui 168 genótipos de café avaliados por severidade, incidência e desfolha. Cada uma dessas variáveis representa uma dimensão em nossos dados. 
+
+O PCA extrai a informação chave desses dados multivariados e a apresenta em poucas variáveis novas chamadas componentes principais, que são combinações lineares das variáveis originais. O objetivo é identificar as principais direções ao longo das quais a variação nos dados é máxima.
+
+Inicialmente os genótipos foram extraídos do dataframe utilizando a função `textshape::column_to_rownames` do pacote `textshape`. Essa função foi empregada para converter a primeira coluna do dataframe em nomes de fila, permitindo uma organização mais adequada dos dados para a análisis subsequente.
+
+```{r}
+# Cargar pacote
+library(textshape)
+
+# Alterar a coluna 'genotype' para nomes de linha
+dato1 <- textshape::column_to_rownames(dato1, loc = 1)
+dato1
+```
+
+O PCA foi realizado utilizando a função `PCA()` do pacote `FactoMineR`. Utilizamos o dataframe **`dato1`**, que contém os valores médios das variáveis AUDPC de incidência, severidade e desfolha. O argumento **`scale.unit = TRUE`** foi utilizado para escalar os dados, ajustando suas unidades de medida para ter média zero e desvio padrão igual a um, tanto positivo quanto negativo. Além disso, foram utilizados os argumentos **`ncp = 3`** e **`graph = FALSE`** para calcular três componentes principais e evitar a geração automática de gráficos do PCA.
+
+```{r}
+# Cargar bibliotecas
+library(FactoMineR)
+library(factoextra)
+
+# Estimar os eigen-value
+pca.results <- PCA(dato1, 
+    scale.unit = TRUE, 
+    ncp = 3, 
+    graph = FALSE)
+pca.results
+```
+
+Após calcular o PCA com `PCA()`, utiliza-se `fviz_pca_ind()` para visualizar a distribuição dos genótipos no espaço das componentes principais. Ao especificar `col.ind = "cos2"` e `gradient.cols`, cada genótipo é atribuído a uma cor que reflete sua contribuição para as componentes principais. Esse método permite uma interpretação visual imediata da organização dos genótipos em relação à estrutura dos dados reduzidos pelo PCA.
+
+```{r}
+# Visualizar a distribuição dos genótipos
+fviz_pca_ind(pca.results, 
+             col.ind = "cos2", 
+             gradient.cols = c("#00AFBB", 
+                               "#E7B800", 
+                               "#FC4E07"),
+             repel = FALSE)
+```
+
+### Distância euclidiana
+
+La distancia es estimada utilizando la función `dist()` con el método `"euclidean"` a partir de los datos normalizados con la función `scale()`. Para Visualizar la matriz de distancia nos apoyamos la función `fviz_dist()` del paquete `factoextra` ara visualizar la matriz de distancia. Esta función colorea las celdas de la matriz según los valores de distancia, utilizando un gradiente de colores que va de azul a rojo.
+
+```{r}
+# Cargar biblioteca
+library(stats)
+
+# Normalizar dados
+df.scale <- scale(dato1)
+
+# Calcular a distância
+dist.eucl <- dist(df.scale, 
+                method = "euclidean")
+
+# Transformar resultados a matriz
+round(as.matrix(dist.eucl)[1:168, 1:168], 2)
+
+# Visualização da matriz de distância
+fviz_dist(dist.obj = dist.eucl, 
+          lab_size = 3,
+          gradient = list(low = "#00AFBB", 
+                          mid = "white", 
+                          high = "#FC4E07")) + 
+  theme(legend.position = "none")
+```
+
+**Vamos con un ejemplo para mejorar la explicación:**
+
+```{r}
+# 10 genotipos
+set.seed(123)  
+genotype_azar <- sample(1:168, 10)
+
+# Subset de dados 
+dato1_subset <- dato1[genotype_azar, ]
+
+# Normalizar dados
+df.scale1 <- scale(dato1_subset)
+dist.eucl1 <- dist(df.scale1, method = "euclidean")
+round(as.matrix(dist.eucl1), 2)
+
+# Visualização da matriz de distância
+fviz_dist(dist.obj = dist.eucl1, 
+          lab_size = 10,
+          gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
+```
+
+As distâncias calculadas revelam diferenças e semelhanças entre os genótipos. Uma menor distância indica uma maior semelhança nas características epidemiológicas avaliadas, enquanto uma maior distância indica maiores diferenças. Por exemplo, os genótipos 1 e 7 têm uma distância de apenas 0,28, sugerindo uma alta semelhança, enquanto o genótipo 5 e 10 mostram a maior distância (5,01), indicando que esses genótipos são significativamente diferentes. Esta análise fornece informações cruciais para entender a variabilidade fenotípica em uma população, facilitando a tomada de decisões em programas de melhoramento genético e a compreensão da estrutura genética do café em termos de resistência a **H. vastatrix**.
+
+### Similaridade e Dendograma 
+
+Usaremos os dados escalados **dist.eucl** e a função `hclust()` para realizar o agrupamento hierárquico UPGMA. A estrutura será visualizada em um dendrograma usando a função `fviz_dend()`, que mostrará os agrupamentos dos genótipos. 
+
+```{r}
+# Cálculo da similaridade
+hc.results <- hclust(dist.eucl, 
+                    method = "average")
+
+# Visualização do dendrograma.
+fviz_dend(hc.results,
+          cex = 0.7) +
+  labs(title = "Herarchical clustering",
+       subtitle = "Distância euclidiana, UPGMA")
+```
+
+### Coeficiente de Correlação Cofenético (CCC)
+
+Vamos avaliar a qualidade do agrupamento usando o valor do coeficiente de correlação cophenético (CCC). Primeiramente, utilizamos a função `cophenetic()` para calcular a matriz de distâncias cophenéticas a partir do dendrograma. Em seguida, estimamos o CCC comparando a matriz de distâncias original (`dist.eucl`) com a matriz de distâncias cophenéticas (`res.coph`). Este coeficiente indica o quão bem as distâncias no dendrograma representam as distâncias originais entre os dados."
+
+```{r}
+# Distância Cofenético 
+res.coph <- cophenetic(hc.results)
+res.coph
+
+# Correlação entre distância cophenética e distância euclidiana
+cor(dist.eucl, res.coph)
+```
+
+### Determinação do número de grupos
+
+Utiliza-se a biblioteca `NbClust` para realizar uma análise exaustiva e determinar o número ótimo de clusters com base em diferentes índices de validação. Nos argumentos, especifica-se o número mínimo (`min.nc`) e máximo (`max.nc`) de clusters a serem avaliados, neste caso, de 2 a 10. Emprega-se o método "average" e calculam-se todos os índices disponíveis no pacote NbClust para avaliar a qualidade dos clusters.
+
+```{r}
+# Cargar bibliotecas
+library(NbClust)
+
+# Cálculo os grupos
+nb <- NbClust(df.scale,
+              distance = "euclidean", 
+              min.nc = 2, max.nc = 10, 
+              method = "average",
+              index = "alllong")
+nb
+```
+
+O índice Dindex e o índice Hubert são métodos gráficos usados para identificar o número ótimo de clusters através de gráficos de linhas, como mostrado na saída da função `nbClust()`. Neste caso, o índice Hubert sugere 4 como o melhor número de clusters, enquanto o índice Dindex propõe 7 clusters como ótimos.
+
+### Clustering
+
+O agrupamento é realizado utilizando a função `kmeans()`, especificando 4 clusters e 100 inícios diferentes para garantir a estabilidade dos resultados.
+
+```{r}
+# Cargar bibliotecas
+library(factoextra)
+library(NbClust)
+
+# Agrupar com 4 clusters e 100 inícios diferentes
+set.seed(123)
+km.results <- kmeans(df.scale, 
+                     centers = 4, 
+                     nstart = 100)
+km.results
+
+# Agrupar com 4 clusters e 100 inícios diferentes
+dato1$Cluster <- km.results$cluster
+dato1
+```
+
+Os resultados do clustering são atribuídos à base de dados original dato1, adicionando uma coluna que indica o cluster atribuído a cada genótipo.
+
+
+## PCA-Biplot
+
+Utilizaremos um PCA-Biplot para simplificar a análise dos componentes principais (PCA) e visualizar a correlação entre as variáveis epidemiológicas e os genótipos avaliados.Primero, convertimos a coluna `Cluster` em um fator e depois a removemos do dataframe para estimar os componentes principais, que são salvos em um vetor chamado `df.clust.pca`. Usamos a função `fviz_pca_biplot()` para criar um biplot de PCA e adicionamos argumentos para melhorar a apresentação do gráfico.
+
+```{r}
+# Converta a coluna 'Cluster' em um fator
+dato1$Cluster <- as.factor(dato1$Cluster)
+dato1
+
+# PCA
+df.clust.pca <- PCA(dato1[,-4], graph = FALSE)
+df.clust.pca
+
+# Biplot-PCA
+fviz_pca_biplot(df.clust.pca,
+                addEllipses = TRUE,
+                geom.ind = "point",
+                pointshape = 21,
+                pointsize = 2.0,
+                fill.ind = dato1$Cluster,
+                col.ind = "black",
+                col.var = factor(c("mean_incidence",
+                                   "mean_severity",
+                                   "mean_defoliation")),
+                legend.title = list(fill = "Clusters", 
+                                    color = "Variables"),
+                repel = FALSE) +
+  ggpubr::fill_palette("jco") + 
+  ggpubr::color_palette("npg") 
+```
+
+
+## Boxplot
+
+O seguinte script e o gráfico de boxplot são projetados para visualizar as diferenças na incidência média entre quatro grupos identificados no conjunto de dados **dato1**.
+
+**Para a incidência:**
+
+```{r}
+dato1 |> 
+  ggplot(aes(Cluster, mean_incidence, fill = Cluster)) +
+  stat_boxplot(geom = "errorbar", 
+               width = 0.15) +
+  geom_boxplot(outlier.shape = NA,
+               color = "black",
+               size = 0.5) + 
+  geom_jitter(color = "black",
+               size = 2) +
+  theme_classic() +
+  labs(x = "Grupos",
+       y = "Incidência") +
+  scale_fill_brewer(palette = "7") +
+  theme(axis.title = element_text(size = 12, color = "black")) +
+  theme(axis.text.x = element_text(size = 12, color = "black")) +
+  theme(axis.text.y = element_text(size = 12, color = "black")) 
+```
+**Para a Severidade:**
+
+```{r}
+dato1 |> 
+  ggplot(aes(Cluster, mean_severity, fill = Cluster)) +
+  stat_boxplot(geom = "errorbar", 
+               width = 0.15) +
+  geom_boxplot(outlier.shape = NA,
+               color = "black",
+               size = 0.5) + 
+  geom_jitter(color = "black",
+               size = 2) +
+  theme_classic() +
+  labs(x = "Grupos",
+       y = "Severidade") +
+  scale_fill_brewer(palette = "7") +
+  theme(axis.title = element_text(size = 12, color = "black")) +
+  theme(axis.text.x = element_text(size = 12, color = "black")) +
+  theme(axis.text.y = element_text(size = 12, color = "black")) 
+```
+
+**Para a desfola:**
+
+```{r}
+dato1 |> 
+  ggplot(aes(Cluster, mean_defoliation, fill = Cluster)) +
+  stat_boxplot(geom = "errorbar", 
+               width = 0.15) +
+  geom_boxplot(outlier.shape = NA,
+               color = "black",
+               size = 0.5) + 
+  geom_jitter(color = "black",
+               size = 2) +
+  theme_classic() +
+  labs(x = "Grupos",
+       y = "Desfolha") +
+  scale_fill_brewer(palette = "7") +
+  theme(axis.title = element_text(size = 12, color = "black")) +
+  theme(axis.text.x = element_text(size = 12, color = "black")) +
+  theme(axis.text.y = element_text(size = 12, color = "black")) 
+```
+
+
+## Conclusões 
+
+A identificação de genótipos de café resistentes a H. vastatrix é de grande importância para a seleção e melhoria genética da cultura. Neste estudo, avaliamos a resistência à ferrugem amarela utilizando três variáveis AUDPC de incidência, severidade e desfolha. Calculamos a distância euclidiana entre os genótipos usando essas variáveis e aplicamos um método de agrupamento hierárquico, o que nos permitiu identificar quatro grupos divergentes. Dentro desses grupos, o grupo 3 (representado em cinza) destacou-se como o mais resistente à doença."
+
+
+
+
+
+
+
+

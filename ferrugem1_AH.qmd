@@ -1,0 +1,302 @@
+---
+title: "ANOVA, Avaliação das premissas e GLMs"
+author: "Amanda Pereira Honório & Richard Pardes-Espinosa"
+date: "2024-06-26"
+format: html
+toc: true
+number-sections: true
+code-fold: show
+---
+
+## Preparar os dados
+
+Carregar o *dataframe* criado anteriormente: AUDPC
+Para isso, foram carregados os pacotes abaixo:
+```{r}
+# Carregar bibliotecas
+library(readxl)
+library(dplyr)
+library(tidyverse)
+
+# Chamar dataframe
+AUDPC <- read_csv("ferrugem_AUDPC.CSV")
+str(AUDPC)
+
+# Reescrevendo o dataframe sem a coluna Repetition
+AUDPC <- AUDPC[,c(-2)]  
+AUDPC
+```
+
+
+## ANOVA (*One-way*)
+
+Após calcular as variáveis de resposta da AACPD para a incidência, severidade e desfolha, avaliou-se o ANOVA (One-way ANOVA). Para isso, formulamos as seguintes hipóteses:
+
+**Hipótese nula (Ho):** propõe que todas as médias são iguais.
+
+**Hipótese alternativa (Ha):** sugere que pelo menos uma média é diferente.
+
+A significância dos resultados foi avaliada utilizando um **p-valor < 0,05**.
+
+Para comparar as médias da incidência/severidade/desfolha entre os diferentes genótipos, foi utilizado a função `aov`. Em seguida, com `summary`, foi extraido um resumo do modelo ajustado que inclui os estatísticos F, valores p, graus de liberdade e somas de quadrados.
+
+### AACPD incidência
+
+Em continuação, criamos um objeto chamado **av1** para a variável inicidence, o qual conterá os dados da ANOVA.
+
+```{r}
+# AUDPC incidence
+av1 <- aov(incidence ~ genotype, 
+           data = AUDPC)
+summary(av1)
+```
+Baseado nas tabelas da ANOVA, interpreta-se que, dado que os valores de "p" (1.62e-06 ) foram inferiores ao nível de significância (0,05), a hipótese nula é rejeitada e a hipótese alternativa é aceita. Isso sugere que há evidência estatística de que pelo menos um dos tratamentos difere significativamente na AACPD da incidência em comparação com os outros tratamentos.
+
+### AACPD severidade
+
+Em continuação, criamos um objeto chamado **av2** para a variável severity, o qual conterá os dados da ANOVA.
+
+```{r}
+# AUDPC severity
+av2 <- aov(severity ~ genotype, 
+           data = AUDPC)
+summary(av2)
+```
+Baseado nas tabelas da ANOVA, interpreta-se que, dado que os valores de "p" (1.68e-07) foram inferiores ao nível de significância (0,05), a hipótese nula é rejeitada e a hipótese alternativa é aceita. Isso sugere que há evidência estatística de que pelo menos um dos tratamentos difere significativamente na AACPD da severidade em comparação com os outros tratamentos.
+
+### AACPD desfolha
+
+Em continuação, criamos um objeto chamado **av3** para a variável defoliation, o qual conterá os dados da ANOVA.
+
+```{r}
+# AUDPC defoliation
+av3 <- aov(defoliation ~ genotype, 
+           data = AUDPC)
+summary(av3)
+```
+Baseado nas tabelas da ANOVA, interpreta-se que, dado que os valores de "p" (0.0489) foram inferiores ao nível de significância (0,05), a hipótese nula é rejeitada e a hipótese alternativa é aceita. Isso sugere que há evidência estatística de que pelo menos um dos tratamentos difere significativamente na AACPD da desfolha  em comparação com os outros tratamentos.
+
+## Distribuição da população
+
+Os resíduos de três modelos ANOVA foram extraídos e foram criados data frames para cada variável utilizando as funções `residuals` e `data.frame`.
+
+```{r}
+# Extrair resíduos das três variáveis
+residuals1 <- residuals(av1)
+residuals2 <- residuals(av2)
+residuals3 <- residuals(av3)
+```
+
+Os dataframes residuals1.df, residuals2.df e residuals3.df contêm os resíduos dos modelos ANOVA para cada uma das três variáveis (incidência/severidade/desfolha). Esses resíduos são úteis para verificar os pressupostos do modelo, como a normalidade dos erros e a homogeneidade das variâncias. Além disso, podem ser utilizados para realizar análises adicionais, como a detecção de valores atípicos ou a avaliação da adequação do modelo.
+
+```{r}
+# Criar um dataframe com os resíduos
+residuals1.df <- data.frame(residuals = residuals1)
+residuals2.df <- data.frame(residuals = residuals2)
+residuals3.df <- data.frame(residuals = residuals3)
+```
+
+Agora, vamos visualizar a distribuição da população para as três variáveis de resposta. 
+
+Criamos o objeto plot1, que apresenta um gráfico a distribuição dos resíduos da ANOVA realizada sobre a AACPD da incidência. Os resíduos da ANOVA foram plotados como um histograma. Este histograma permite visualizar como os resíduos estão distribuídos em torno de zero, o que é importante para verificar se os pressupostos da ANOVA (como a normalidade dos resíduos) são atendidos. Isso também foi realizado para as outras duas variáveis AACPD da severidade (plot2) e AACPD da desfolha (plot3).
+
+```{r}
+# Histograma AUDPC incidencia
+plot1 <- residuals1.df |> 
+  ggplot(aes(x = residuals1)) +
+  geom_histogram(bins = 10, 
+                 color = "black", 
+                 fill = "orange") +
+  theme_minimal() +
+  labs(title = "Distribuição da Incidência, Severidade e Desfolha",
+     x = "Resíduos",
+     y = "Frequência") + 
+  theme(axis.text.x = element_text(size = 12, 
+                                   color = "Black", 
+                                   hjust = 0.5, 
+                                   vjust = 1)) + 
+  theme(axis.text.y = element_text(size = 12, 
+                                   color = "Black", 
+                                   hjust = 1, 
+                                   vjust = 0.4),
+        axis.title = element_text(size = 12, color = "black"))
+plot1
+```
+
+```{r}
+# Histograma AUDPC severity
+plot2 <- residuals2.df |> 
+  ggplot(aes(x = residuals2)) +
+  geom_histogram(bins = 10, 
+                 color = "black", 
+                 fill = "#00FF7F") +
+  theme_minimal() +
+  labs(title = "",
+     x = "Resíduos",
+     y = "Frequência") + 
+  theme(axis.text.x = element_text(size = 12, 
+                                   color = "Black", 
+                                   hjust = 0.5, 
+                                   vjust = 1)) + 
+  theme(axis.text.y = element_text(size = 12, 
+                                   color = "Black", 
+                                   hjust = 1, 
+                                   vjust = 0.4),
+        axis.title = element_text(size = 12, color = "black"))
+plot2
+```
+
+```{r}
+# Histograma AUDPC defoliation
+plot3 <- residuals3.df |> 
+  ggplot(aes(x = residuals3)) +
+  geom_histogram(bins = 10, 
+                 color = "black", 
+                 fill = "#BF3EFF") +
+  theme_minimal() +
+  labs(title = "",
+     x = "Resíduos",
+     y = "Frequência") + 
+  theme(axis.text.x = element_text(size = 12, 
+                                   color = "Black", 
+                                   hjust = 0.5, 
+                                   vjust = 1)) + 
+  theme(axis.text.y = element_text(size = 12, 
+                                   color = "Black", 
+                                   hjust = 1, 
+                                   vjust = 0.4),
+        axis.title = element_text(size = 12, color = "black"))
+plot3
+```
+
+A seguir, os gráficos criados foram unidos utilizando o pacote `patchwork`:
+
+```{r}
+# Carregar bibliotecas
+library(patchwork)
+
+# Combine plots
+plot1 + plot2 + plot3 
+```
+
+
+## Normalidade, Homocedasticidade e Independência dos Resíduos
+
+Foram avaliados os pressupostos utilizando o pacote `DHARMa`, que avalia os resíduos obtidos pelos modelos ajustados. Utilizaremos os modelos av1, av2 e av3, que correspondem aos AACPD para incidência, severidade e desfolha. 
+
+```{r}
+# Carregar bibliotecas
+library(DHARMa)
+
+# Visualizar
+plot(simulateResiduals(av1))
+plot(simulateResiduals(av2))
+plot(simulateResiduals(av3))
+```
+
+A análise visual pelo pacote `DHARMa` indicou que a premissa de homocedasticidade foi atendida, porém a normalidade não foi atendida para as variáveis AACPD incidência (homocedasticidade "p" = 0,89, normalidade "p" = 2e-05) e AACPD severidade (homocedasticidade "p" = 0,89 , normalidade "p"= 0). Para a variável AACPD desfolha, tanto a premissa de homocedasticidade quanto a de normalidade foram atendidas (homocedasticidade "p" = 0,89 , normalidade "p" = 1,34).Isso nos leva a considerar a possibilidade de transformar os dados para melhorar sua distribuição ou utilizar um modelo linear generalizado (GLM).
+
+## Modelo Linear Generalizado (GLM)
+
+Foi utilizado o modelo linear generalizado (GLM) para determinar as diferenças significativas entre os genótipos de cafeeiro. Para esta análise, foram utilizados os pacotes `faraway` e `MASS`.
+
+### GML para a variáveis AACDP incidência
+
+Utilizamos a função `glm` para criar um modelo linear generalizado. O conjunto de dados AUDPC contém essas informações.A função `summary` aplicada ao objeto glm.Inc fornece um resumo detalhado do modelo ajustado. Isso também foi realizado para AACPD severidade (glm.Sev) e AACPD desfolha (glm.Def).
+
+```{r}
+# Carregar bibliotecas 
+library(faraway)      
+library(MASS)         
+
+# AUDCP Incidencia 
+glm.Inc <- glm(incidence ~ genotype,
+               data = AUDPC)
+summary(glm.Inc)
+```
+
+### GML para a variável severidade
+
+```{r}
+# AUDPC Severidad
+glm.Sev <- glm(severity ~ genotype,
+               data = AUDPC)
+summary(glm.Sev)
+```
+
+### GML para a variável desfolha
+
+```{r}
+# AUDPC defoliation
+glm.Def <- glm(defoliation ~ genotype,
+               data = AUDPC)
+summary(glm.Def)
+```
+
+## Método de Scott-Knott
+
+A comparação de médias pelo método de Scott-Knott é uma técnica estatística para agrupar médias de tratamentos ou grupos que não diferem significativamente entre si. Este método divide as médias em grupos homogêneos, maximizando as diferenças entre os grupos e minimizando as diferenças dentro de cada grupo. Para realizar análises de agrupamento de médias, foi utilizado o pacote `ScottKnott` e a função `SK()`.
+
+### SK para a variável AACPD incidência
+
+Primeiramente, convertemos a várivel genotype para fator com a função `as.factor`. Posteriormente, criamos o objeto SK1 que contém os resultados do teste de Scott-Knott, incluindo os grupos de genótipos que não são significativamente diferentes entre si com base nas váriaveis incidence e genotype. Isso também foi realizado para AACPD severidade (SK2 - severity e genotype) e AACPD desfolha (SK3- defoliation e genotype).
+
+```{r}
+# Carregar bilioteca
+library(ScottKnott)
+
+# Convertir genótipo em fator
+
+AUDPC$genotype <- as.factor(as.character(AUDPC$genotype))
+class(AUDPC$genotype)
+
+table(AUDPC$genotype)
+
+SK1 <- with(AUDPC, 
+            SK(incidence ~ genotype, 
+               sig.level = 0.05, 
+               which = "genotype"))
+SK1
+```
+Os genótipos foram agrupados em cinco categorias distintas com base na AACPD incidência:
+
+Grupo 'a': Genótipos mais suscetíveis à ferrugem (maiores áreas abaixo da curva).
+Grupo 'b': Genótipos com suscetibilidade moderada à ferrugem.
+Grupo 'c': Genótipos com resistência moderada à ferrugem.
+Grupo 'd': Genótipos com resistência considerável à ferrugem.
+Grupo 'e': Genótipos mais resistentes à ferrugem (menores áreas abaixo da curva).
+
+### SK para a variável AACPD severidade
+
+```{r}
+SK2 <- with(AUDPC, 
+            SK(severity ~ genotype, 
+               sig.level = 0.05, 
+               which = "genotype"))
+SK2
+```
+
+Os genótipos foram agrupados em seis categorias distintas com base na AACPD severidade:
+
+Grupo 'a': Genótipos mais suscetíveis à ferrugem (maiores severidades).
+Grupo 'b': Genótipos com suscetibilidade moderada à ferrugem.
+Grupo 'c': Genótipos com resistência moderada à ferrugem.
+Grupo 'd': Genótipos com resistência considerável à ferrugem.
+Grupo 'e': Genótipos bastante resistentes à ferrugem.
+Grupo 'f': Genótipos mais resistentes à ferrugem (menores severidades).
+
+### SK para a variável AACPD desfolha
+
+```{r}
+SK3 <- with(AUDPC, 
+            SK(defoliation ~ genotype, 
+               sig.level = 0.05, 
+               which = "genotype"))
+SK3
+```
+Os genótipos foram agrupados em quatro categorias distintas com base na AACPD de desfolha causada pela ferrugem:
+
+Grupo 'a': Genótipos mais suscetíveis à ferrugem (maiores áreas abaixo da curva).
+Grupo 'b': Genótipos com suscetibilidade moderada à ferrugem.
+Grupo 'c': Genótipos com resistência moderada à ferrugem.
+Grupo 'd': Genótipos mais resistentes à ferrugem (menores áreas abaixo da curva).

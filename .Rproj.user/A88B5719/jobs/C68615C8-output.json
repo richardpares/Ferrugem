@@ -1,0 +1,6 @@
+[1,"==> quarto preview ferrugem1.qmd --to html --no-watch-inputs --no-browse\n\n"]
+[1,"\r\n\r\nprocessing file: ferrugem1.qmd\r\n\r  |                                                         \r  |                                                   |   0%\r  |                                                         \r  |..                                                 |   3%                   \r  |                                                         \r  |...                                                |   6% [unnamed-chunk-1] "]
+[1,"\r\nQuitting from lines  at lines 22-33 [unnamed-chunk-1] (ferrugem1.qmd)\r\n"]
+[1,"Error:\r\n! objeto 'AUDPC.df' no encontrado\r\nBacktrace:\r\n 1. utils::head(AUDPC.df)\r\n"]
+[1,"\r                                                                                                             \r\n"]
+[1,"Ejecución interrumpida\r\n"]
